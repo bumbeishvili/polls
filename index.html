@@ -1,0 +1,973 @@
+
+
+<!DOCTYPE html>
+<html >
+  <head>
+    <meta charset="UTF-8">
+
+
+    <title>CodePen - A Pen by  dato</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/css/materialize.min.css'>
+
+        <style>
+      h1 {
+  text-align: center;
+  margin: 5px;
+}
+
+.buttons button {
+  margin-bottom: 10px;
+}
+
+.buttons {
+  position: fixed;
+  left: 20px;
+}
+
+.toggle-lang {
+  position: fixed;
+  right: 10px;
+  top: 10px;
+}
+
+.custom-tooltip {
+  position: fixed;
+  max-width: 500px;
+}
+.custom-tooltip td, .custom-tooltip th {
+  padding: 5px !important;
+}
+.custom-tooltip .card .card-content .card-title {
+  line-height: 26px;
+}
+
+    </style>
+
+    
+    
+    
+    
+  </head>
+
+  <body translate="no" >
+
+    <h1 class="header">არჩევნები 2016</h1>
+
+<div class="tooltip-template" style='display:none'>
+<div class="row">
+        <div class="col">
+          <div class="card " style="background-color:#PARTY_COLOR">
+            <div class="card-content white-text">
+              <span class="card-title">#PARTY_NAME</span>
+              <table>
+                 <tr><th>#VOTE_PERCENT_TEXT</th><td>#VOTE_PERCENT %</td></tr>
+                <tr><th>#VOTE_COUNT_TEXT</th><td>#VOTE_COUNT</td></tr>
+                <tr><th>#VOTE_TOTAL_TEXT</th><td>#VOTE_TOTAL</td></tr>
+                <tr><th>#POLL_DATE_TEXT</th><td>#POLL_DATE</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+</div>
+
+<button class="toggle-lang btn-floating" onclick="toggle()">En</button>
+<div class="row">
+     <div class="buttons"></div>
+    <div id='graphContent'></div>
+</div>
+
+<div class="custom-tooltip"></div>
+    
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/js/materialize.min.js'></script>
+
+        <script>
+      var selector = '#graphContent';
+
+function toggle() {
+  set('.toggle-lang', global.currentLang);
+  global.currentLang = global.currentLang == "En" ? "Ge" : 'En';
+  drawContent()
+}
+
+function drawContent() {
+  clear();
+  set('.header', global.texts['header' + global.currentLang]);
+  var currentSource = global.currentSource;
+  if (!currentSource) {
+    currentSource = 'average';
+  }
+  addAverage(polls);
+  draw({
+    data: {
+      children: merge(polls[currentSource].data),
+      votePercent: 1 // without it, circles are overlapping - http://stackoverflow.com/questions/14790340/d3-js-pack-layout-circles-are-overlapping
+    }
+  })
+  global.currentSource = currentSource;
+  generateButtons(polls);
+  get('.' + global.currentSource).disabled = true;
+}
+
+var global = {
+  transition: null,
+  currentSource: null,
+  currentLang: "Ge",
+  defaultRespondentCountIfNotSpecified: 1200, // this is standart number  of sociological polls, according to tornike bakakuri
+  texts: {
+    headerEn: "Elections 2016",
+    headerGe: "არჩევნები 2016",
+    votePercentGe: "პროცენტულობა",
+    votePercentEn: "Percent",
+    voteCountGe: "მიღებული ხმები",
+    voteCountEn: "Votes",
+    voteTotalGe: "გამოკითხულთა რაოდენობა",
+    voteTotalEn: "Number of respondents",
+    pollDateGe: "გამოკითხვის თარიღი",
+    pollDateEn: "Date of poll"
+  },
+  partiesInfo: {
+    '1': {
+      shortNameGe: "ბურჭულაძე",
+      nameGe: "პაატა ბურჭულაძე - სახელმწიფო ხალხისთვის",
+      shortNameEn: "Burchuladze",
+      nameEn: "Paata Burchuladze ",
+      color: "#ED1B24"
+    },
+    '3': {
+      shortNameGe: "ბურჯანაძე",
+      nameGe: '"ნინო ბურჯანაძე - დემოკრატიული მოძრაობა"',
+      shortNameEn: "Burjanadze",
+      nameEn: "Nino Burjanadze - Democratic movement ",
+      color: '#022EC1'
+    },
+    '4': {
+      shortNameGe: "ბაღათურია",
+      nameGe: '"ჯონდი ბაღათურია - ქართული დასი"',
+      shortNameEn: "Baghaturia",
+      nameEn: "Nino Burjanadze - Democratic movement ",
+      color: '#B1241B'
+    },
+    '5': {
+      shortNameGe: "ნაციონალები",
+      nameGe: 'ერთიანი ნაციონალური მოძრაობა',
+      shortNameEn: "Nationals",
+      nameEn: 'United national movement',
+      color: '#E4012E'
+    },
+    '6': {
+      shortNameGe: "რესპუბლიკელები",
+      nameGe: 'უსუფაშვილი - რესპუბლიკელები',
+      shortNameEn: "Republicans",
+      nameEn: "Usupashvili - Republicans",
+      color: '#F3701E'
+    },
+    '7': {
+      shortNameGe: "მეჭიაური",
+      nameGe: 'თამაზ მეჭიაური ერთიანი საქართველოსთვის',
+      shortNameEn: "Mechiauri",
+      nameEn: "Tamaz Mechiauri for united Georgia ",
+      color: '#e5ab87'
+    },
+    '8': {
+      shortNameGe: "პატრ. ალიანსი",
+      nameGe: 'დავით თარხან-მოურავი, ირმა ინაშვილი - საქართველოს პატრიოტთა ალიანსი, გაერთიანებული ოპოზიცია',
+      shortNameEn: "Patr.Aliance",
+      nameEn: "Patriotic Aliance, United Oposition",
+      color: '#E1BC63'
+    },
+    '10': {
+      shortNameGe: "ნათელაშვილი",
+      nameGe: 'შალვა ნათელაშვილი - საქართველოს ლეიბორისტული პარტია',
+      shortNameEn: "Natelashvili",
+      nameEn: "Shalva Natelashvili - Georgian labor party",
+      color: '#41499A'
+    },
+    '14': {
+      shortNameGe: "დავით თევზაძე",
+      nameGe: 'დავით თევზაძე - საქართველოს მშვიდობისათვის',
+      shortNameEn: "David tevzadze",
+      nameEn: "David tevzadze - Georgia for peace",
+      color: '#191F6B'
+    },
+    '19': {
+      shortNameGe: "თოფაძე",
+      nameGe: 'თოფაძე - მრეწველები, ჩვენი სამშობლო',
+      shortNameEn: "Topadze",
+      nameEn: "Topadze - Industrials, our homeland",
+      color: '#5F1016'
+    },
+    '23': {
+      shortNameGe: "სახალხო პარტია",
+      nameGe: 'ჩვენები - სახალხო პარტია',
+      shortNameEn: "Public party",
+      nameEn: "Ours - public party ",
+      color: '#FECD28'
+    },
+    '25': {
+      shortNameGe: "მემარცხენეები",
+      nameGe: 'კახა ძაგანია, სოსო შატბერაშვილი, პაატა ჯიბლაძე, არჩილ ბენიძე - მემარცხენე ალიანსი',
+      shortNameEn: "Left",
+      nameEn: "Left wing aliance",
+      color: '#BBA252'
+    },
+    '26': {
+      shortNameGe: "ერ. ფორუმი",
+      nameGe: 'ეროვნული ფორუმი',
+      shortNameEn: "Forum",
+      nameEn: "National forum",
+      color: '#FDDB55'
+    },
+    '27': {
+      shortNameGe: "ალასანია",
+      nameGe: 'ირაკლი ალასანია - თავისუფალი დემოკრატები',
+      shortNameEn: "Alasania",
+      nameEn: "Irakli Alasania - Free Democrats",
+      color: '#01308A'
+    },
+    '41': {
+      shortNameGe: "ოცნება",
+      nameGe: 'ქართული ოცნება - დემოკრატიული საქართველო',
+      shortNameEn: "Dream",
+      nameEn: "Georgian Dream",
+      color: '#004B91'
+    },
+    'sxva': {
+      shortNameGe: "სხვას",
+      nameGe: 'სხვა',
+      shortNameEn: "Other",
+      nameEn: "Other",
+      color: '#46a812'
+    },
+    'aravis': {
+      shortNameGe: "არავის",
+      nameGe: 'არავის',
+      shortNameEn: "No one",
+      nameEn: "No one ",
+      color: '#aa8ace'
+    },
+    'argadamiwyvetia': {
+      shortNameGe: "არ ვიცი",
+      nameGe: 'არ გადამიწყვეტია',
+      shortNameEn: "Don't know",
+      nameEn: "I don't know yet ",
+      color: '#aab3c1'
+    }
+  }
+
+};
+
+function draw(p) {
+
+  var attrs = {
+      circlePadding: 4,
+      data: p.data,
+      selector: selector,
+      width: window.innerWidth - 20,
+      height: window.innerHeight - 25,
+
+    }
+    //test
+  var dynamic = {};
+  dynamic.svgWidth = attrs.width;
+  dynamic.svgHeight = attrs.height - 80;
+
+  //####################  LAYOUTS   ###############
+  var layouts = {}
+
+  layouts.bubble = d3.layout.pack()
+    .size([dynamic.svgWidth, dynamic.svgHeight])
+    .sort(function(a, b) {
+      return a.name > b.name
+    })
+    .value(function(d) {
+      return Math.max(d.votePercent, 0.05);
+    })
+    .padding(attrs.circlePadding);
+
+  // ########## DATA GENERATION ##########
+  var nodes = layouts.bubble.nodes(attrs.data)
+    .filter(function(d) {
+      //filtering big parent circles
+      return !d.children;
+    })
+
+  //###########  DRAWING   #############
+  //drawing svg
+  var svg = d3.select(attrs.selector)
+    .append('svg')
+    .attr('width', dynamic.svgWidth)
+    .attr('height', dynamic.svgHeight);
+
+  //drawing circles
+
+  var circleGroups = svg.selectAll('g')
+    .data(nodes)
+    .enter()
+    .append('g')
+    .attr('class', 'circle-group')
+
+  circleGroups.transition().duration(1000)
+    .attr('cursor', 'pointer')
+    .attr('transform', function(d) {
+      return 'translate(' + d.x + ',' + d.y + ')'
+    })
+
+  //circle
+  circleGroups
+    .append('circle')
+    .attr('fill', function(d) {
+      return d.party.color;
+    })
+    .attr('class', function(d) {
+      return 'test' + d.electNumber;
+    })
+    .attr('r', function(d) {
+      return d.r
+    })
+    //text
+  circleGroups.append('text')
+    .attr("dy", ".3em")
+    .attr("transform", function(d) {
+      if (d.votePercent >= 1) return "translate(0,-10)";
+    })
+    .attr('class', 'title')
+    .style("text-anchor", "middle")
+    .attr('fill', function(d) {
+      return 'white'
+    })
+    .text(text)
+
+  //text
+
+  circleGroups.append('text')
+    .attr("dy", ".3em")
+    .attr('class', 'circle-percent')
+    .attr("transform", "translate(0,15)")
+    .style("text-anchor", "middle")
+    .attr('fill', function(d) {
+      return 'white'
+    })
+    .text(function(d) {
+      if (d.votePercent >= 1) {
+        return d.votePercent.toFixed(1) + ' %';
+      }
+
+    })
+
+  //########################   TOOLTIP  ######################
+
+  circleGroups.on('mouseenter', mouseEnter);
+  circleGroups.on('mouseleave', mouseLeave);
+  circleGroups.on('mousemove', mouseMove);
+
+  //########################   FUNCTIONS   #########################
+
+  function mouseMove(d) {
+    var y = d3.event.pageY - 300;
+    var x = d3.event.pageX + 20;
+
+    d3.select('.custom-tooltip').style('top', y + 'px').style('left', x + 'px')
+
+  }
+
+  function mouseEnter(d) {
+
+    var circleGroup = d3.select(this)
+      .select('circle');
+
+    var tooltipContent = get('.tooltip-template').innerHTML;
+
+    tooltipContent = tooltipContent.replace(/#PARTY_COLOR/i, d.party.color);
+    tooltipContent = tooltipContent.replace(/#PARTY_NAME/i, d.party['name' + global.currentLang]);
+    tooltipContent = tooltipContent.replace(/#VOTE_PERCENT_TEXT/i, global.texts['votePercent' + global.currentLang]);
+    tooltipContent = tooltipContent.replace(/#VOTE_PERCENT/i, d.votePercent.toFixed(2));
+    tooltipContent = tooltipContent.replace(/#VOTE_COUNT_TEXT/i, global.texts['voteCount' + global.currentLang]);
+    tooltipContent = tooltipContent.replace(/#VOTE_COUNT/i, (polls[global.currentSource].polled * d.votePercent / 100).toFixed(0));
+    tooltipContent = tooltipContent.replace(/#VOTE_TOTAL_TEXT/i, global.texts['voteTotal' + global.currentLang]);
+    tooltipContent = tooltipContent.replace(/#VOTE_TOTAL/i, polls[global.currentSource].polled);
+
+    tooltipContent = tooltipContent.replace(/#POLL_DATE_TEXT/i, global.texts['pollDate' + global.currentLang]);
+    tooltipContent = tooltipContent.replace(/#POLL_DATE/i, polls[global.currentSource]['pollDate' + global.currentLang]);
+
+    set('.custom-tooltip', tooltipContent);
+    d3.select('.custom-tooltip').transition().style('opacity', 1)
+    circleGroup.attr('stroke', '#82b1ff')
+      .attr('stroke-width', 10);
+
+  }
+
+  function mouseLeave() {
+    var circleGroup = d3.select(this).
+    select('circle');
+    circleGroup.attr('stroke', 'none')
+      .attr('stroke-width', 0);
+
+    d3.select('.custom-tooltip')
+      .transition()
+      .style('opacity', 0.1)
+      .each('end', function() {
+        get('.custom-tooltip').innerHTML = "";
+      });
+
+  }
+
+  function text(d) {
+
+    var electNumber = "";
+    if (!isNaN(d.electNumber)) {
+      electNumber = d.electNumber + ". ";
+    }
+
+    if (d.votePercent > 11) {
+      return electNumber + d.party['shortName' + global.currentLang];
+    }
+    if (d.votePercent > 0.5 && isNaN(d.electNumber)) {
+      return d.party['shortName' + global.currentLang];
+    }
+    if (d.votePercent > 0.4) {
+      return 'N ' + d.electNumber;
+
+    }
+
+  }
+
+  global.transition = function(source) {
+    debugger;
+    if (global.currentSource == source) {
+      return;
+    }
+
+    get('.' + global.currentSource).disabled = false;
+    global.currentSource = source;
+    get('.' + global.currentSource).disabled = true;
+
+    var newNodes = layouts.bubble.nodes({
+        children: merge(polls[source].data),
+        votePercent: 1
+      })
+      .filter(function(d) {
+        //filtering big parent circles
+        return !d.children;
+      })
+
+    var newCircleGroup = svg.selectAll('.circle-group')
+      .data(newNodes)
+
+    newCircleGroup.transition()
+      .duration(1000)
+      .attr('transform', function(d) {
+
+        return 'translate(' + d.x + ',' + d.y + ')'
+      })
+
+    newCircleGroup.select('circle')
+
+    .attr('fill', function(d) {
+        return d.party.color;
+      })
+      .transition()
+      .duration(1000)
+
+    .attr('r', function(d) {
+      return d.r
+    })
+
+    newCircleGroup.select('.title')
+      .attr("dy", ".3em")
+      .attr("transform", function(d) {
+        if (d.votePercent >= 1) return "translate(0,-10)";
+      })
+      .style("text-anchor", "middle")
+      .attr('fill-opacity', 0)
+      .text(text)
+      .transition()
+      .duration(1000)
+      .attr('fill-opacity', 1)
+
+    newCircleGroup.select('.circle-percent')
+      .attr("dy", ".3em")
+      .attr("transform", "translate(0,15)")
+      .style("text-anchor", "middle")
+      .attr('fill-opacity', 0)
+      .text(function(d) {
+        if (d.votePercent >= 1) {
+          return d.votePercent.toFixed(1) + ' %';
+        }
+      })
+      .transition()
+      .duration(1000)
+      .attr('fill-opacity', 1)
+
+  }
+
+}
+
+var polls = {
+  "average": {
+    "nameGe": 'გამოკითხვათა შეჯამება',
+    "nameEn": 'Exit polls summary',
+    "pollDateGe": '7 სექტემბრიდან დღემდე',
+    "pollDateEn": 'From 7 sept. ',
+    "polled": 0,
+  },
+  "wpa": {
+    "nameGe": "სოციოლოგიური კომპანია WPA",
+    "nameEn": "Sociological company WPA",
+    "polled": 1329,
+    "pollDateGe": '7-11 სექტემბერი',
+    "pollDateEn": '7-11 September',
+    "source": "http://www.interpressnews.ge/ge/sazogadoeba/398603-wpa-s-kvlevis-thanakhmad-gamokithkhultha-25-mkhars-utcers-qarthul-ocnebas-kholo-16-patriottha-alianss.html?ar=A",
+    "data": [{
+      "electNumber": "1",
+      "votePercent": 1
+    }, {
+      "electNumber": "3",
+      "votePercent": 3
+    }, {
+      "electNumber": "4",
+      "votePercent": 0
+    }, {
+      "electNumber": "5",
+      "votePercent": 12
+    }, {
+      "electNumber": "6",
+      "votePercent": 0
+    }, {
+      "electNumber": "7",
+      "votePercent": 1
+    }, {
+      "electNumber": "8",
+      "votePercent": 16
+    }, {
+      "electNumber": "10",
+      "votePercent": 4
+    }, {
+      "electNumber": "14",
+      "votePercent": 0
+    }, {
+      "electNumber": "19",
+      "votePercent": 0
+    }, {
+      "electNumber": "23",
+      "votePercent": 0
+    }, {
+      "electNumber": "25",
+      "votePercent": 0
+    }, {
+      "electNumber": "26",
+      "votePercent": 0
+    }, {
+      "electNumber": "27",
+      "votePercent": 2
+    }, {
+      "electNumber": "41",
+      "votePercent": 25
+    }, {
+      "electNumber": "sxva",
+      "votePercent": 1
+    }, {
+      "electNumber": "aravis",
+      "votePercent": 16
+    }, {
+      "electNumber": "argadamiwyvetia",
+      "votePercent": 18
+    }]
+  },
+  "imedi": {
+    "nameGe": "TV იმედი - GPM",
+    "nameEn": "TV Imedi - GPM",
+    "polled": 1199,
+    "pollDateGe": '27 სექ. - 3 ოქტ',
+    "pollDateEn": '27 sep - 3 oct.',
+    "source": "http://liberali.ge/news/view/25011/imedis-kvleva-qartuli-otsneba--36-ertiani-natsionaluri-modzraoba-13",
+    "data": [{
+      "electNumber": "1",
+      "votePercent": 2
+    }, {
+      "electNumber": "3",
+      "votePercent": 2
+    }, {
+      "electNumber": "4",
+      "votePercent": 0
+    }, {
+      "electNumber": "5",
+      "votePercent": 13
+    }, {
+      "electNumber": "6",
+      "votePercent": 0
+    }, {
+      "electNumber": "7",
+      "votePercent": 0
+    }, {
+      "electNumber": "8",
+      "votePercent": 2
+    }, {
+      "electNumber": "10",
+      "votePercent": 3
+    }, {
+      "electNumber": "14",
+      "votePercent": 0
+    }, {
+      "electNumber": "19",
+      "votePercent": 0
+    }, {
+      "electNumber": "23",
+      "votePercent": 0
+    }, {
+      "electNumber": "25",
+      "votePercent": 0
+    }, {
+      "electNumber": "26",
+      "votePercent": 0
+    }, {
+      "electNumber": "27",
+      "votePercent": 4
+    }, {
+      "electNumber": "41",
+      "votePercent": 36
+    }, {
+      "electNumber": "sxva",
+      "votePercent": 2
+    }, {
+      "electNumber": "aravis",
+      "votePercent": 0
+    }, {
+      "electNumber": "argadamiwyvetia",
+      "votePercent": 36
+    }]
+  },
+  "rustavi2": {
+    "nameGe": "რუსთავი2 - GFK",
+    "nameEn": "Rustavi2 - GFK",
+    "polled": global.defaultRespondentCountIfNotSpecified,
+    "pollDateGe": 'ოქტომბერი',
+    "pollDateEn": 'October',
+    "source": "http://factcheck.ge/article/qhvela-gamokithkhva-erthad-partiebis-tsinasaarchevno-reitingebi/",
+    "data": [{
+      "electNumber": "1",
+      "votePercent": 2.6
+    }, {
+      "electNumber": "3",
+      "votePercent": 1.5
+    }, {
+      "electNumber": "4",
+      "votePercent": 0
+    }, {
+      "electNumber": "5",
+      "votePercent": 26
+    }, {
+      "electNumber": "6",
+      "votePercent": 0.7
+    }, {
+      "electNumber": "7",
+      "votePercent": 0
+    }, {
+      "electNumber": "8",
+      "votePercent": 1.5
+    }, {
+      "electNumber": "10",
+      "votePercent": 3.8
+    }, {
+      "electNumber": "14",
+      "votePercent": 0
+    }, {
+      "electNumber": "19",
+      "votePercent": 0
+    }, {
+      "electNumber": "23",
+      "votePercent": 0
+    }, {
+      "electNumber": "25",
+      "votePercent": 0
+    }, {
+      "electNumber": "26",
+      "votePercent": 0
+    }, {
+      "electNumber": "27",
+      "votePercent": 3.6
+    }, {
+      "electNumber": "41",
+      "votePercent": 25.4
+    }, {
+      "electNumber": "sxva",
+      "votePercent": 0
+    }, {
+      "electNumber": "aravis",
+      "votePercent": 0
+    }, {
+      "electNumber": "argadamiwyvetia",
+      "votePercent": 35
+    }]
+  },
+  "exclusivenews": {
+    "nameGe": "ექსკლუზივ ნიუსი",
+    "nameEn": "Exclusive News",
+    "polled": 2091,
+    "pollDateGe": '1 ოქტომბრიდან',
+    "pollDateEn": 'From 1 Oct.',
+    "source": "http://exclusivenews.ge/post/22565",
+    "data": [{
+      "electNumber": "1",
+      "votePercent": 2
+    }, {
+      "electNumber": "3",
+      "votePercent": 5
+    }, {
+      "electNumber": "4",
+      "votePercent": 0
+    }, {
+      "electNumber": "5",
+      "votePercent": 15
+    }, {
+      "electNumber": "6",
+      "votePercent": 0
+    }, {
+      "electNumber": "7",
+      "votePercent": 0
+    }, {
+      "electNumber": "8",
+      "votePercent": 7
+    }, {
+      "electNumber": "10",
+      "votePercent": 0
+    }, {
+      "electNumber": "14",
+      "votePercent": 0
+    }, {
+      "electNumber": "19",
+      "votePercent": 0
+    }, {
+      "electNumber": "23",
+      "votePercent": 0
+    }, {
+      "electNumber": "25",
+      "votePercent": 0
+    }, {
+      "electNumber": "26",
+      "votePercent": 2
+    }, {
+      "electNumber": "27",
+      "votePercent": 4
+    }, {
+      "electNumber": "41",
+      "votePercent": 63
+    }, {
+      "electNumber": "sxva",
+      "votePercent": 0
+    }, {
+      "electNumber": "aravis",
+      "votePercent": 0
+    }, {
+      "electNumber": "argadamiwyvetia",
+      "votePercent": 0
+    }]
+  },
+  "exper": {
+    "nameGe": "ექსპერტთა გამოკითხვა",
+    "nameEn": "Expert polls",
+    "polled": 0,
+    "pollDateGe": '22-29 სექ.',
+    "pollDateEn": '22-29 sep',
+    "source": "http://netgazeti.ge/news/144856/",
+    "data": [{
+      "electNumber": "1",
+      "votePercent": 9
+    }, {
+      "electNumber": "3",
+      "votePercent": 4
+    }, {
+      "electNumber": "4",
+      "votePercent": 0
+    }, {
+      "electNumber": "5",
+      "votePercent": 26
+    }, {
+      "electNumber": "6",
+      "votePercent": 5
+    }, {
+      "electNumber": "7",
+      "votePercent": 0
+    }, {
+      "electNumber": "8",
+      "votePercent": 6
+    }, {
+      "electNumber": "10",
+      "votePercent": 3
+    }, {
+      "electNumber": "14",
+      "votePercent": 0
+    }, {
+      "electNumber": "19",
+      "votePercent": 0
+    }, {
+      "electNumber": "23",
+      "votePercent": 0
+    }, {
+      "electNumber": "25",
+      "votePercent": 0
+    }, {
+      "electNumber": "26",
+      "votePercent": 0
+    }, {
+      "electNumber": "27",
+      "votePercent": 7
+    }, {
+      "electNumber": "41",
+      "votePercent": 36
+    }, {
+      "electNumber": "sxva",
+      "votePercent": 0
+    }, {
+      "electNumber": "aravis",
+      "votePercent": 0
+    }, {
+      "electNumber": "argadamiwyvetia",
+      "votePercent": 0
+    }]
+  },
+"test": {
+    "nameGe": "test",
+    "nameEn": "test",
+    "polled": 0,
+    "pollDateGe": '27 სექ. - 3 ოქტ',
+    "pollDateEn": '27 sep - 3 oct.',
+    "source": "",
+    "data": [{
+      "electNumber": "1",
+      "votePercent": 0
+    }, {
+      "electNumber": "3",
+      "votePercent": 0
+    }, {
+      "electNumber": "4",
+      "votePercent": 0
+    }, {
+      "electNumber": "5",
+      "votePercent": 0
+    }, {
+      "electNumber": "6",
+      "votePercent": 0
+    }, {
+      "electNumber": "7",
+      "votePercent": 0
+    }, {
+      "electNumber": "8",
+      "votePercent": 0
+    }, {
+      "electNumber": "10",
+      "votePercent": 0
+    }, {
+      "electNumber": "14",
+      "votePercent": 0
+    }, {
+      "electNumber": "19",
+      "votePercent": 0
+    }, {
+      "electNumber": "23",
+      "votePercent": 0
+    }, {
+      "electNumber": "25",
+      "votePercent": 0
+    }, {
+      "electNumber": "26",
+      "votePercent": 0
+    }, {
+      "electNumber": "27",
+      "votePercent": 0
+    }, {
+      "electNumber": "41",
+      "votePercent": 0
+    }, {
+      "electNumber": "sxva",
+      "votePercent": 0
+    }, {
+      "electNumber": "aravis",
+      "votePercent": 0
+    }, {
+      "electNumber": "argadamiwyvetia",
+      "votePercent": 0
+    }]
+  },
+
+}
+
+function merge(data) {
+
+  data.forEach(function(d) {
+    d.party = global.partiesInfo[d.electNumber]
+  })
+  return data;
+}
+
+function addAverage(polls) {
+  var keys = Object.keys(polls);
+  var partiesInfoKeys = Object.keys(global.partiesInfo);
+  var total = 0
+  keys.forEach(function(k) {
+    total += polls[k].polled;
+  });
+  polls.average.polled = total;
+  polls.average.data = partiesInfoKeys.map(function(pk, i) {
+
+    var poll = {
+      electNumber: pk,
+    };
+
+    var voted = 0;
+
+    keys.forEach(function(k) {
+      if (polls[k].data) {
+        voted += polls[k].data[i].votePercent * polls[k].polled;
+        console.log(polls[k].data[i].electNumber == pk); // all output must be true 
+      }
+    })
+
+    poll.votePercent = voted / polls.average.polled;
+    return poll;
+
+  })
+
+}
+
+function generateButtons(polls) {
+
+  var keys = Object.keys(polls);
+  var buttons = keys.map(function(key) {
+    var btnClass = " deep-purple lighten-2 ";
+    if (key == "average") btnClass = " teal darken-2 ";
+    return "<br><button  class=' waves-effect waves-light btn " + btnClass + key + "' onclick=\"global.transition(" + "'" + key + "'" + ")\">" + polls[key]['name' + global.currentLang] + "</button>";
+  }).join('');
+
+  set('.buttons', buttons);
+}
+
+function set(selector, content) {
+  document.querySelector(selector).innerHTML = content;
+}
+
+function get(selector) {
+  return document.querySelector(selector);
+}
+
+function clear() {
+  set('#graphContent', '');
+  set('.buttons', '');
+  polls.average.polled = 0;
+  polls.average.data = null;
+}
+
+drawContent();
+      //# sourceURL=pen.js
+    </script>
+
+    
+    
+  </body>
+</html>
+ 
