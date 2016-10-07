@@ -57,8 +57,8 @@
 }
 
 .poll-info {
-  position: fixed;
-  max-width: 250px;
+  position: absolute;
+  max-width: 300px;
   right: 15px;
 }
 
@@ -132,13 +132,23 @@
   <div class="fb-share-button" data-href="http://polls.ge/" data-layout="button_count" data-size="small" data-mobile-iframe="true"><a class="fb-xfbml-parse-ignore" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Fpolls.ge%2F&amp;src=sdkpreparse">Share</a></div>
   
   <div style="float:right"class="fb-like" data-href="https://www.facebook.com/polls.ge/" data-layout="button_count" data-action="like" data-size="small" data-show-faces="true" data-share="false"></div>
+  
+  
+  
+  
 </div>
 
+ 
 <button class="toggle-lang btn-floating" onclick="toggle()">En</button>
 <div class="row">
   <div class="buttons"></div>
   <div id='graphContent'></div>
 </div>
+<div class="row">
+  
+ <div style="margin-left:30%"class="fb-comments " data-href="http://polls.ge/" data-numposts="5"></div>
+</div>
+
 
 
 <div class="custom-tooltip"></div>
@@ -162,7 +172,7 @@ function drawContent() {
 
   var currentSource = global.currentSource;
   if (!currentSource) {
-    currentSource = 'experts';
+    currentSource = 'average';
   }
   addAverage(polls);
 
@@ -1063,3 +1073,4 @@ drawContent();
   </body>
 </html>
  
+a
