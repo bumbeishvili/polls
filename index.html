@@ -8,6 +8,8 @@
 
     <title>CodePen - A Pen by  dato</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="shortcut icon" type="image/x-icon" href="https://raw.githubusercontent.com/bumbeishvili/Assets/master/Projects/D3/Polls/pollsPng.png" />
     
     
     <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/css/materialize.min.css'>
@@ -44,6 +46,16 @@
   line-height: 26px;
 }
 
+.poll-card {
+  color: black;
+}
+
+.poll-info {
+  position: fixed;
+  max-width: 250px;
+  right: 15px;
+}
+
     </style>
 
     
@@ -57,28 +69,48 @@
     <h1 class="header">არჩევნები 2016</h1>
 
 <div class="tooltip-template" style='display:none'>
-<div class="row">
-        <div class="col">
-          <div class="card " style="background-color:#PARTY_COLOR">
-            <div class="card-content white-text">
-              <span class="card-title">#PARTY_NAME</span>
-              <table>
-                 <tr><th>#VOTE_PERCENT_TEXT</th><td>#VOTE_PERCENT %</td></tr>
-                <tr><th>#VOTE_COUNT_TEXT</th><td>#VOTE_COUNT</td></tr>
-                <tr><th>#VOTE_TOTAL_TEXT</th><td>#VOTE_TOTAL</td></tr>
-                <tr><th>#POLL_DATE_TEXT</th><td>#POLL_DATE</td></tr>
-              </table>
-            </div>
-          </div>
+  <div class="row">
+    <div class="col">
+      <div class="card " style="background-color:#PARTY_COLOR">
+        <div class="card-content white-text">
+          <span class="card-title">#PARTY_NAME</span>
+          <table>
+            <tr>
+              <th>#VOTE_PERCENT_TEXT</th>
+              <td>#VOTE_PERCENT %</td>
+            </tr>
+            <tr>
+              <th>#VOTE_COUNT_TEXT</th>
+              <td>#VOTE_COUNT</td>
+            </tr>
+          </table>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+<div class=" poll-info">
+  <div class="card ">
+    <div class="card-content ">
+      <span class="card-title"> გამოკითხვათა შეჯამება</span> 
+      <br>
+      <div class="poll-info-content">
+      
+              კვლევის განმავლობაში სულ მოსაზრება გამოთქვა <span>2000</span> -მა ადამიანმა, გამოკითხვა მიმდინარეობდა 
+         <br><br>  ინფორმაციის წყარო
+        </div>
+     
+    </div>
+
+  </div>
 </div>
 
 <button class="toggle-lang btn-floating" onclick="toggle()">En</button>
 <div class="row">
-     <div class="buttons"></div>
-    <div id='graphContent'></div>
+  <div class="buttons"></div>
+  <div id='graphContent'></div>
 </div>
+
 
 <div class="custom-tooltip"></div>
     
@@ -98,11 +130,13 @@ function toggle() {
 function drawContent() {
   clear();
   set('.header', global.texts['header' + global.currentLang]);
+
   var currentSource = global.currentSource;
   if (!currentSource) {
-    currentSource = 'average';
+    currentSource = 'experts';
   }
   addAverage(polls);
+
   draw({
     data: {
       children: merge(polls[currentSource].data),
@@ -110,8 +144,34 @@ function drawContent() {
     }
   })
   global.currentSource = currentSource;
+  composePollInfo();
   generateButtons(polls);
   get('.' + global.currentSource).disabled = true;
+}
+
+function composePollInfo() {
+  /*
+  pollInfoCountGe:"კვლევის განმავლობაში სულ მოსაზრება გამოთქვა ",
+    pollInfoCountGe:"During the poll, total number of interviewed citizens, was ",
+    pollInfoTimeGe:"-მა ადამიანმა, გამოკითხვა მიმდინარეობდა",
+    pollInfoTimeEn:". Poll was active on ",
+    pollInfoSourceGe:"<br> ინფორმაციის წყარო",
+    pollInfoSourceEn:"<br> Information source",
+    */
+
+  var poll = polls[global.currentSource];
+  var lang = global.currentLang;
+  set('.poll-info .card-title', poll['name' + lang]);
+
+  var pollInfo = global.texts['pollInfoCount' + lang];
+  pollInfo += poll.polled;
+  pollInfo += global.texts['pollInfoTime' + lang];
+  pollInfo += poll['pollDate' + lang];
+
+  pollInfo += "<br> <a target='_blank' href='" + poll.source + "'>" + global.texts['pollInfoSource' + lang] + "</a>";
+
+  set('.poll-info .poll-info-content', pollInfo);
+
 }
 
 var global = {
@@ -129,7 +189,13 @@ var global = {
     voteTotalGe: "გამოკითხულთა რაოდენობა",
     voteTotalEn: "Number of respondents",
     pollDateGe: "გამოკითხვის თარიღი",
-    pollDateEn: "Date of poll"
+    pollDateEn: "Date of poll",
+    pollInfoCountGe: "კვლევის განმავლობაში სულ მოსაზრება გამოთქვა ",
+    pollInfoCountEn: "During the poll, total number of interviewed citizens, was ",
+    pollInfoTimeGe: "-მა ადამიანმა, გამოკითხვა მიმდინარეობდა ",
+    pollInfoTimeEn: ". Poll was active on ",
+    pollInfoSourceGe: "<br> ინფორმაციის წყარო",
+    pollInfoSourceEn: "<br> Information source",
   },
   partiesInfo: {
     '1': {
@@ -369,7 +435,7 @@ function draw(p) {
   //########################   FUNCTIONS   #########################
 
   function mouseMove(d) {
-    var y = d3.event.pageY - 300;
+    var y = d3.event.pageY - 200;
     var x = d3.event.pageX + 20;
 
     d3.select('.custom-tooltip').style('top', y + 'px').style('left', x + 'px')
@@ -389,11 +455,7 @@ function draw(p) {
     tooltipContent = tooltipContent.replace(/#VOTE_PERCENT/i, d.votePercent.toFixed(2));
     tooltipContent = tooltipContent.replace(/#VOTE_COUNT_TEXT/i, global.texts['voteCount' + global.currentLang]);
     tooltipContent = tooltipContent.replace(/#VOTE_COUNT/i, (polls[global.currentSource].polled * d.votePercent / 100).toFixed(0));
-    tooltipContent = tooltipContent.replace(/#VOTE_TOTAL_TEXT/i, global.texts['voteTotal' + global.currentLang]);
-    tooltipContent = tooltipContent.replace(/#VOTE_TOTAL/i, polls[global.currentSource].polled);
 
-    tooltipContent = tooltipContent.replace(/#POLL_DATE_TEXT/i, global.texts['pollDate' + global.currentLang]);
-    tooltipContent = tooltipContent.replace(/#POLL_DATE/i, polls[global.currentSource]['pollDate' + global.currentLang]);
 
     set('.custom-tooltip', tooltipContent);
     d3.select('.custom-tooltip').transition().style('opacity', 1)
@@ -438,7 +500,7 @@ function draw(p) {
   }
 
   global.transition = function(source) {
-    debugger;
+
     if (global.currentSource == source) {
       return;
     }
@@ -446,6 +508,7 @@ function draw(p) {
     get('.' + global.currentSource).disabled = false;
     global.currentSource = source;
     get('.' + global.currentSource).disabled = true;
+    composePollInfo();
 
     var newNodes = layouts.bubble.nodes({
         children: merge(polls[source].data),
@@ -646,8 +709,8 @@ var polls = {
     "nameGe": "რუსთავი2 - GFK",
     "nameEn": "Rustavi2 - GFK",
     "polled": global.defaultRespondentCountIfNotSpecified,
-    "pollDateGe": 'ოქტომბერი',
-    "pollDateEn": 'October',
+    "pollDateGe": 'ოქტომბრის განმავლობაში',
+    "pollDateEn": 'during october',
     "source": "http://factcheck.ge/article/qhvela-gamokithkhva-erthad-partiebis-tsinasaarchevno-reitingebi/",
     "data": [{
       "electNumber": "1",
@@ -768,7 +831,7 @@ var polls = {
       "votePercent": 0
     }]
   },
-  "exper": {
+  "experts": {
     "nameGe": "ექსპერტთა გამოკითხვა",
     "nameEn": "Expert polls",
     "polled": 0,
@@ -831,7 +894,7 @@ var polls = {
       "votePercent": 0
     }]
   },
-"test": {
+  "test": {
     "nameGe": "test",
     "nameEn": "test",
     "polled": 0,
