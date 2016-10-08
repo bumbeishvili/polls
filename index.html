@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
 
 
-    <title>Elections 2016</title>
+    <title>Election 2016</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="shortcut icon" type="image/x-icon" href="https://raw.githubusercontent.com/bumbeishvili/Assets/master/Projects/D3/Polls/pollsPng.png" />
@@ -197,6 +197,9 @@
         <script>
       var selector = '#graphContent';
 
+function isSmallScreen(){
+  return window.innerWidth<1000;
+}
 function toggle() {
   set('.toggle-lang', global.currentLang);
   global.currentLang = global.currentLang == "En" ? "Ge" : 'En';
@@ -517,6 +520,10 @@ function draw(p) {
       return 'white'
     })
     .text(function(d) {
+    if(isSmallScreen() && d.votePercent < 3.5){
+      return "";
+      
+    }
       if (d.votePercent >= 1) {
         return d.votePercent.toFixed(1) + ' %';
       }
@@ -534,6 +541,10 @@ function draw(p) {
   function mouseMove(d) {
     var y = d3.event.pageY - 200;
     var x = d3.event.pageX + 20;
+    
+    if(isSmallScreen()){
+      y-=500;
+    }
 
     d3.select('.custom-tooltip').style('top', y + 'px').style('left', x + 'px')
 
@@ -577,18 +588,28 @@ function draw(p) {
 
   function text(d) {
 
+    var smallScreen  = isSmallScreen();
     var electNumber = "";
     if (!isNaN(d.electNumber)) {
       electNumber = d.electNumber + ". ";
     }
 
-    if (d.votePercent > 11) {
+    if (d.votePercent > 30) {
       return electNumber + d.party['shortName' + global.currentLang];
     }
-    if (d.votePercent > 0.5 && isNaN(d.electNumber)) {
+    if (d.votePercent > 11 && !smallScreen) {
+      return electNumber + d.party['shortName' + global.currentLang];
+    }
+    if (d.votePercent > 5 && smallScreen && !isNaN(d.electNumber)) {
+       return 'N ' + d.electNumber;
+    }
+    if (d.votePercent <3 && isSmallScreen ) {
+      return "";
+    }
+    if (d.votePercent > 0.5 && isNaN(d.electNumber) ) {
       return d.party['shortName' + global.currentLang];
     }
-    if (d.votePercent > 0.4) {
+    if (d.votePercent > 0.4 && !smallScreen) {
       return 'N ' + d.electNumber;
 
     }
