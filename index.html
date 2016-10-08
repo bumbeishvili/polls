@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
 
 
-    <title>Election 2016</title>
+    <title>Elections 2016</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="shortcut icon" type="image/x-icon" href="https://raw.githubusercontent.com/bumbeishvili/Assets/master/Projects/D3/Polls/pollsPng.png" />
@@ -271,7 +271,7 @@ var global = {
     headerEn: "Elections 2016",
     headerGe: "არჩევნები 2016",
     
-    contactGe:"<a  target='_blank' href='https://www.facebook.com/polls.ge/'>მოგვწერეთ</a>, სხვა შედეგების დასამატებლად",
+    contactGe:"<a  target='_blank' href='https://www.facebook.com/polls.ge/'>მოგვწერეთ</a>, სხვა გამოკითხვების დასამატებლად",
     contactEn:"<a target='_blank' href='https://www.facebook.com/polls.ge/'>Write us </a>, to add more polls",
     
     votePercentGe: "პროცენტულობა",
@@ -524,7 +524,7 @@ function draw(p) {
       return "";
       
     }
-      if (d.votePercent >= 1) {
+      if (d.votePercent >= 1.2) {
         return d.votePercent.toFixed(1) + ' %';
       }
 
@@ -603,8 +603,13 @@ function draw(p) {
       return n+electNumber + d.party['shortName' + global.currentLang];
     } 
     
-     if (d.votePercent > 1 && isNaN(d.electNumber) ) {
+     if (d.votePercent >1 && isNaN(d.electNumber) ) {
       return d.party['shortName' + global.currentLang];
+    }
+    
+    
+     if (d.votePercent <=1.2  ) {
+      return "";
     }
     
     if(smallScreen){
@@ -704,7 +709,7 @@ function draw(p) {
       .style("text-anchor", "middle")
       .attr('fill-opacity', 0)
       .text(function(d) {
-        if (d.votePercent >= 1) {
+        if (d.votePercent >= 1.2) {
           return d.votePercent.toFixed(1) + ' %';
         }
       })
