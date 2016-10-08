@@ -212,7 +212,7 @@ function drawContent() {
 
   var currentSource = global.currentSource;
   if (!currentSource) {
-    currentSource = 'average';
+    currentSource = 'tns';
   }
   addAverage(polls);
 
@@ -247,7 +247,9 @@ function composePollInfo() {
     pollInfo += global.texts['ceskoLastChange' + lang];
     pollInfo += poll['pollDate' + lang];
 
-  } else {
+  } else if(poll.type=="pointOfView"||poll.type=="exitpoll"){
+    pollInfo += poll['pollDate' + lang];
+  }else {
     pollInfo += global.texts['pollInfoCount' + lang];
     pollInfo += poll.polled;
     pollInfo += global.texts['pollInfoTime' + lang];
@@ -560,6 +562,9 @@ function draw(p) {
 
     var circleGroup = d3.select(this)
       .select('circle');
+    
+    var countTextReplacer="";
+    var countReplacer="";
 
     var tooltipContent = get('.tooltip-template').innerHTML;
 
@@ -567,8 +572,14 @@ function draw(p) {
     tooltipContent = tooltipContent.replace(/#PARTY_NAME/i, d.party['name' + global.currentLang]);
     tooltipContent = tooltipContent.replace(/#VOTE_PERCENT_TEXT/i, global.texts['votePercent' + global.currentLang]);
     tooltipContent = tooltipContent.replace(/#VOTE_PERCENT/i, d.votePercent.toFixed(2));
-    tooltipContent = tooltipContent.replace(/#VOTE_COUNT_TEXT/i, global.texts['voteCount' + global.currentLang]);
-    tooltipContent = tooltipContent.replace(/#VOTE_COUNT/i, (polls[global.currentSource].polled * d.votePercent / 100).toFixed(0));
+    
+    if(polls[global.currentSource].type != 'exitpoll'){
+          countTextReplacer=global.texts['voteCount' + global.currentLang];
+     countReplacer=(polls[global.currentSource].polled * d.votePercent / 100).toFixed(0);
+    }
+
+     tooltipContent = tooltipContent.replace(/#VOTE_COUNT_TEXT/i,countTextReplacer );
+    tooltipContent = tooltipContent.replace(/#VOTE_COUNT/i,countReplacer) ;
 
     set('.custom-tooltip', tooltipContent);
     d3.select('.custom-tooltip').transition().style('opacity', 1)
@@ -795,7 +806,139 @@ var polls = {
       "votePercent": 0
     }]
   },
-
+"tns": {
+    "nameGe": "TNS ეგზიტპოლი (GDS,მაესტრო, იმედი,საზმაუ)",
+    "nameEn": "TNS exitpoll (GDS,maestro,imedi,sazmau)",
+  "polled":0,
+    "pollDateGe": '8 ოქტომბერი',
+    "pollDateEn": '8 october',
+    "source": "http://www.interpressnews.ge/ge/skhva/401340-tns-opinion-is-egzitpolis-pirveladi-shedegebis-thanakhmad-amomrcheveltha-538-mkhars-qarthul-ocnebas-utcers-kholo-195-qnacionaluri-modzraobasq.html",
+  "type":"exitpoll",
+    "data": [{
+      "electNumber": "1",
+      "votePercent": 2.7
+    }, {
+      "electNumber": "3",
+      "votePercent": 0
+    }, {
+      "electNumber": "4",
+      "votePercent": 0
+    }, {
+      "electNumber": "5",
+      "votePercent": 19.5
+    }, {
+      "electNumber": "6",
+      "votePercent": 0
+    }, {
+      "electNumber": "7",
+      "votePercent": 0
+    }, {
+      "electNumber": "8",
+      "votePercent": 5
+    }, {
+      "electNumber": "10",
+      "votePercent": 3.1
+    }, {
+      "electNumber": "14",
+      "votePercent": 0
+    }, {
+      "electNumber": "19",
+      "votePercent": 0
+    }, {
+      "electNumber": "23",
+      "votePercent": 0
+    }, {
+      "electNumber": "25",
+      "votePercent": 0
+    }, {
+      "electNumber": "26",
+      "votePercent": 0
+    }, {
+      "electNumber": "27",
+      "votePercent": 4
+    }, {
+      "electNumber": "41",
+      "votePercent": 53.8
+    }, {
+      "electNumber": "sxva",
+      "votePercent": 0
+    }, {
+      "electNumber": "aravis",
+      "votePercent": 0
+    }, {
+      "electNumber": "argadamiwyvetia",
+      "votePercent": 0
+    },{
+      "electNumber": "uari",
+      "votePercent": 0
+    }]
+  },  "gfkexit": {
+    "nameGe": "GFK-ს ეგზიტპოლი (რუსთავი2)",
+    "nameEn": "GFK Exitpoll (Rustavi2)",
+    "polled": 0,
+    "pollDateGe": '8 ოქტომბერი',
+    "pollDateEn": '8 october',
+    "type":"exitpoll",
+    "source": "http://www.interpressnews.ge/ge/skhva/401339-gfk-is-egzitpolis-pirveladi-shedegebith-qarthul-ocnebas-amomrcheveltha-399-ma-nacionalur-modzraobas-ki-3274-ma-dautcira-mkhari.html",
+    "data": [{
+      "electNumber": "1",
+      "votePercent": 3.25
+    }, {
+      "electNumber": "3",
+      "votePercent": 2.81
+    }, {
+      "electNumber": "4",
+      "votePercent": 0
+    }, {
+      "electNumber": "5",
+      "votePercent": 32.74
+    }, {
+      "electNumber": "6",
+      "votePercent": 0
+    }, {
+      "electNumber": "7",
+      "votePercent": 0
+    }, {
+      "electNumber": "8",
+      "votePercent": 5.76
+    }, {
+      "electNumber": "10",
+      "votePercent": 4.21
+    }, {
+      "electNumber": "14",
+      "votePercent": 0
+    }, {
+      "electNumber": "19",
+      "votePercent": 0
+    }, {
+      "electNumber": "23",
+      "votePercent": 0
+    }, {
+      "electNumber": "25",
+      "votePercent": 0
+    }, {
+      "electNumber": "26",
+      "votePercent": 0
+    }, {
+      "electNumber": "27",
+      "votePercent": 3.21
+    }, {
+      "electNumber": "41",
+      "votePercent": 39.9
+    }, {
+      "electNumber": "sxva",
+      "votePercent": 8.12
+    }, {
+      "electNumber": "aravis",
+      "votePercent": 0
+    }, {
+      "electNumber": "argadamiwyvetia",
+      "votePercent": 0
+    },{
+      "electNumber": "uari",
+      "votePercent": 0
+    }]
+  },  
   "average": {
     "nameGe": 'გამოკითხვათა შეჯამება',
     "nameEn": 'Polls summary',
@@ -809,6 +952,7 @@ var polls = {
     "polled": 1329,
     "pollDateGe": '7-11 სექტემბერი',
     "pollDateEn": '7-11 September',
+    "type":"poll",
     "source": "http://www.interpressnews.ge/ge/sazogadoeba/398603-wpa-s-kvlevis-thanakhmad-gamokithkhultha-25-mkhars-utcers-qarthul-ocnebas-kholo-16-patriottha-alianss.html?ar=A",
     "data": [{
       "electNumber": "1",
@@ -875,6 +1019,7 @@ var polls = {
     "polled": 4113,
     "pollDateGe": '8 ივნ - 6 ივლ.',
     "pollDateEn": '8 jun - 6 jul.',
+    "type":"poll",
     "source": "https://www.ndi.org/files/Public-Attitude-Findings-Georgian.pdf",
     "data": [{
       "electNumber": "1",
@@ -942,6 +1087,7 @@ var polls = {
     "polled": 1199,
     "pollDateGe": '27 სექ. - 3 ოქტ',
     "pollDateEn": '27 sep - 3 oct.',
+    "type":"poll",
     "source": "http://liberali.ge/news/view/25011/imedis-kvleva-qartuli-otsneba--36-ertiani-natsionaluri-modzraoba-13",
     "data": [{
       "electNumber": "1",
@@ -1008,6 +1154,7 @@ var polls = {
     "polled": global.defaultRespondentCountIfNotSpecified,
     "pollDateGe": 'ოქტომბრის განმავლობაში',
     "pollDateEn": 'during october',
+    "type":"poll",
     "source": "http://factcheck.ge/article/qhvela-gamokithkhva-erthad-partiebis-tsinasaarchevno-reitingebi/",
     "data": [{
       "electNumber": "1",
@@ -1075,6 +1222,7 @@ var polls = {
     "pollDateGe": '22-29 სექ.',
     "pollDateEn": '22-29 sep',
     "source": "http://netgazeti.ge/news/144856/",
+    "type":"pointOfView",
     "data": [{
       "electNumber": "1",
       "votePercent": 9
@@ -1196,71 +1344,12 @@ var polls = {
     }, {
       "electNumber": "argadamiwyvetia",
       "votePercent": 0
-    }]
-  },  
-"test": {
-    "nameGe": "test",
-    "nameEn": "test",
-    "polled": 0,
-    "pollDateGe": '27 სექ. - 3 ოქტ',
-    "pollDateEn": '27 sep - 3 oct.',
-    "source": "",
-    "data": [{
-      "electNumber": "1",
-      "votePercent": 0
-    }, {
-      "electNumber": "3",
-      "votePercent": 0
-    }, {
-      "electNumber": "4",
-      "votePercent": 0
-    }, {
-      "electNumber": "5",
-      "votePercent": 0
-    }, {
-      "electNumber": "6",
-      "votePercent": 0
-    }, {
-      "electNumber": "7",
-      "votePercent": 0
-    }, {
-      "electNumber": "8",
-      "votePercent": 0
-    }, {
-      "electNumber": "10",
-      "votePercent": 0
-    }, {
-      "electNumber": "14",
-      "votePercent": 0
-    }, {
-      "electNumber": "19",
-      "votePercent": 0
-    }, {
-      "electNumber": "23",
-      "votePercent": 0
-    }, {
-      "electNumber": "25",
-      "votePercent": 0
-    }, {
-      "electNumber": "26",
-      "votePercent": 0
-    }, {
-      "electNumber": "27",
-      "votePercent": 0
-    }, {
-      "electNumber": "41",
-      "votePercent": 0
-    }, {
-      "electNumber": "sxva",
-      "votePercent": 0
-    }, {
-      "electNumber": "aravis",
-      "votePercent": 0
-    }, {
-      "electNumber": "argadamiwyvetia",
+    },{
+      "electNumber": "uari",
       "votePercent": 0
     }]
   },  
+  
 */
 }
 
@@ -1277,7 +1366,7 @@ function addAverage(polls) {
   var partiesInfoKeys = Object.keys(global.partiesInfo);
   var total = 0
   keys.forEach(function(k) {
-     if(k!='cesko')  total += polls[k].polled;
+     if( polls[k].type=="poll")  total += polls[k].polled;
   });
   polls.average.polled = total;
   polls.average.data = partiesInfoKeys.map(function(pk, i) {
@@ -1289,7 +1378,8 @@ function addAverage(polls) {
     var voted = 0;
 
     keys.forEach(function(k) {
-      if (polls[k].data && k!='cesko') {
+      console.log(k)
+      if (polls[k].type=="poll" ) {
         voted += polls[k].data[i].votePercent * polls[k].polled;
         console.log(polls[k].data[i].electNumber == pk); // all output must be true 
       }
