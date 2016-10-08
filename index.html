@@ -589,30 +589,58 @@ function draw(p) {
   function text(d) {
 
     var smallScreen  = isSmallScreen();
-    var electNumber = "";
-    if (!isNaN(d.electNumber)) {
+    var n = '';
+     var electNumber = "";
+     if (!isNaN(d.electNumber)) {
       electNumber = d.electNumber + ". ";
+       n='N ';
     }
-
+    
+    
+    
+    
     if (d.votePercent > 30) {
-      return electNumber + d.party['shortName' + global.currentLang];
-    }
-    if (d.votePercent > 11 && !smallScreen) {
-      return electNumber + d.party['shortName' + global.currentLang];
-    }
-    if (d.votePercent > 5 && smallScreen && !isNaN(d.electNumber)) {
-       return 'N ' + d.electNumber;
-    }
-    if (d.votePercent <3 && isSmallScreen ) {
-      return "";
-    }
-    if (d.votePercent > 0.5 && isNaN(d.electNumber) ) {
+      return n+electNumber + d.party['shortName' + global.currentLang];
+    } 
+    
+     if (d.votePercent > 1 && isNaN(d.electNumber) ) {
       return d.party['shortName' + global.currentLang];
     }
-    if (d.votePercent > 0.4 && !smallScreen) {
+    
+    if(smallScreen){
+      if (d.votePercent > 5  && !isNaN(d.electNumber)) {
+        return 'N ' + d.electNumber;
+      }
+      
+       if (d.votePercent <3 ) {
+          return "";
+        }
+    }else{
+      
+      if (d.votePercent > 11 ) {
+          return electNumber + d.party['shortName' + global.currentLang];
+      }
+      if(isNaN(d.electNumber)){
+        return ""
+      }
+      
+       if (d.votePercent > 2  ) {
+        return 'N ' + d.electNumber;
+      }
+      if (d.votePercent > 0.4 ) {
       return 'N ' + d.electNumber;
 
+       }
     }
+   
+   
+
+    
+    
+    
+   
+   
+    
 
   }
 
@@ -692,11 +720,11 @@ var polls = {
   "cesko": {
     "nameGe": "ცეესკო შედეგები",
     "nameEn": "cesko results",
-    "polled": 0,
-    "pollDateGe": '8 სთ.',
-    "pollDateEn": '8 a.m',
-    "activity": "0 % ",
-    "source": "",
+    "polled": 292957,
+    "pollDateGe": '10 სთ.',
+    "pollDateEn": '10 a.m',
+    "activity": "8.34 % ",
+    "source": "http://cesko.ge/geo/list/show/109579-amomrchevelta-aqtivoba-1000-st-is-mdgomareobit-",
     "data": [{
       "electNumber": "1",
       "votePercent": 0
@@ -1155,7 +1183,7 @@ function addAverage(polls) {
   var partiesInfoKeys = Object.keys(global.partiesInfo);
   var total = 0
   keys.forEach(function(k) {
-    total += polls[k].polled;
+     if(k!='cesko')  total += polls[k].polled;
   });
   polls.average.polled = total;
   polls.average.data = partiesInfoKeys.map(function(pk, i) {
@@ -1167,7 +1195,7 @@ function addAverage(polls) {
     var voted = 0;
 
     keys.forEach(function(k) {
-      if (polls[k].data) {
+      if (polls[k].data && k!='cesko') {
         voted += polls[k].data[i].votePercent * polls[k].polled;
         console.log(polls[k].data[i].electNumber == pk); // all output must be true 
       }
