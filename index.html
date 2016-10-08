@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
 
 
-    <title> Elections 2016 </title>
+    <title>Elections 2016</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="shortcut icon" type="image/x-icon" href="https://raw.githubusercontent.com/bumbeishvili/Assets/master/Projects/D3/Polls/pollsPng.png" />
@@ -45,7 +45,8 @@
   position: fixed;
   max-width: 500px;
 }
-.custom-tooltip td, .custom-tooltip th {
+.custom-tooltip td,
+.custom-tooltip th {
   padding: 5px !important;
 }
 .custom-tooltip .card .card-content .card-title {
@@ -66,6 +67,38 @@
   background-color: #60C028;
 }
 
+.fb-comments {
+  margin-left: 30%;
+}
+
+@media only screen and (max-width: 1000px) {
+  .poll-info {
+    position: relative;
+    max-width: 90%;
+    left: 5%;
+  }
+
+  .buttons {
+    position: relative;
+    top: 40px;
+    max-width: 90%;
+    left: 5%;
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .toggle-lang {
+    position: relative;
+    float: right;
+    right: 5%;
+  }
+
+  .fb-comments {
+    margin-left: 0%;
+    max-width: 90%;
+  }
+}
+
     </style>
 
     
@@ -77,13 +110,15 @@
   <body translate="no" >
 
     <div id="fb-root"></div>
-<script>(function(d, s, id) {
-  var js, fjs = d.getElementsByTagName(s)[0];
-  if (d.getElementById(id)) return;
-  js = d.createElement(s); js.id = id;
-  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.8&appId=813508885415765";
-  fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk'));</script>
+<script>
+  (function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.8&appId=813508885415765";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));
+</script>
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -93,9 +128,9 @@
 
   ga('create', 'UA-79501479-2', 'auto');
   ga('send', 'pageview');
-
 </script>
 
+<button class="toggle-lang btn-floating" onclick="toggle()">En</button>
 <h1 class="header">არჩევნები 2016</h1>
 
 <div class="tooltip-template" style='display:none'>
@@ -122,37 +157,35 @@
 <div class=" poll-info">
   <div class="card ">
     <div class="card-content ">
-      <span class="card-title"> გამოკითხვათა შეჯამება</span> 
+      <span class="card-title"> გამოკითხვათა შეჯამება</span>
       <br>
       <div class="poll-info-content">
-      
-              კვლევის განმავლობაში სულ მოსაზრება გამოთქვა <span>2000</span> -მა ადამიანმა, გამოკითხვა მიმდინარეობდა 
-         <br><br>  ინფორმაციის წყარო
-        </div>
-     
+
+        კვლევის განმავლობაში სულ მოსაზრება გამოთქვა <span>2000</span> -მა ადამიანმა, გამოკითხვა მიმდინარეობდა
+        <br><br> ინფორმაციის წყარო
+      </div>
+
     </div>
 
   </div>
   <div class="fb-share-button" data-href="http://polls.ge/" data-layout="button_count" data-size="small" data-mobile-iframe="true"><a class="fb-xfbml-parse-ignore" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Fpolls.ge%2F&amp;src=sdkpreparse">Share</a></div>
-  
-  <div style="float:right"class="fb-like" data-href="https://www.facebook.com/polls.ge/" data-layout="button_count" data-action="like" data-size="small" data-show-faces="true" data-share="false"></div>
-  
-  
-  
-  
+
+  <div style="float:right" class="fb-like" data-href="https://www.facebook.com/polls.ge/" data-layout="button_count" data-action="like" data-size="small" data-show-faces="true" data-share="false"></div>
+
+
 </div>
 
- 
-<button class="toggle-lang btn-floating" onclick="toggle()">En</button>
+
 <div class="row">
+
   <div class="buttons"></div>
+
   <div id='graphContent'></div>
 </div>
 <div class="row">
-  
- <div style="margin-left:30%"class="fb-comments " data-href="http://polls.ge/" data-numposts="5"></div>
-</div>
 
+  <div class="fb-comments " data-href="http://polls.ge/" data-numposts="5"></div>
+</div>
 
 
 <div class="custom-tooltip"></div>
@@ -186,6 +219,7 @@ function drawContent() {
       votePercent: 1 // without it, circles are overlapping - http://stackoverflow.com/questions/14790340/d3-js-pack-layout-circles-are-overlapping
     }
   })
+
   global.currentSource = currentSource;
   composePollInfo();
   generateButtons(polls);
@@ -233,6 +267,10 @@ var global = {
   texts: {
     headerEn: "Elections 2016",
     headerGe: "არჩევნები 2016",
+    
+    contactGe:"<a  target='_blank' href='https://www.facebook.com/polls.ge/'>მოგვწერეთ</a>, სხვა შედეგების დასამატებლად",
+    contactEn:"<a target='_blank' href='https://www.facebook.com/polls.ge/'>Write us </a>, to add more polls",
+    
     votePercentGe: "პროცენტულობა",
     votePercentEn: "Percent",
     voteCountGe: "მიღებული ხმები",
@@ -1122,6 +1160,8 @@ function addAverage(polls) {
 }
 
 function generateButtons(polls) {
+  var contact =  ' <div class="contact"> </div>';
+   
 
   var keys = Object.keys(polls);
   var buttons = keys.map(function(key) {
@@ -1131,7 +1171,8 @@ function generateButtons(polls) {
     return "<br><button  class=' waves-effect waves-light btn " + btnClass + key + "' onclick=\"global.transition(" + "'" + key + "'" + ")\">" + polls[key]['name' + global.currentLang] + "</button>";
   }).join('');
 
-  set('.buttons', buttons);
+  set('.buttons', contact+buttons);
+   set('.contact',global.texts['contact'+global.currentLang]);
 }
 
 function set(selector, content) {
