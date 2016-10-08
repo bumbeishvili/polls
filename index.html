@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
 
 
-    <title>CodePen - A Pen by  dato</title>
+    <title>Elections 2016</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="shortcut icon" type="image/x-icon" href="https://raw.githubusercontent.com/bumbeishvili/Assets/master/Projects/D3/Polls/pollsPng.png" />
@@ -15,7 +15,7 @@
 
 <meta property="og:title"              content="ეგზითპოლების განსხვავებული ვიზუალიზაცია" />
 <meta property="og:description"        content="შეადარეთ სხვადასხვა ორგანიზაციების მიერ დაკვეთილი ეგზითპოლებისა და ცეესკოს შედეგები ერთმანეთს" />
-<meta property="og:image"              content="https://raw.githubusercontent.com/bumbeishvili/Assets/master/Projects/D3/Polls/ElectionsShare.png" />
+<meta property="og:image"              content="https://raw.githubusercontent.com/bumbeishvili/Assets/master/Projects/D3/Polls/ElectionShareExtended.png" />
     
     
     <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/css/materialize.min.css'>
@@ -60,6 +60,10 @@
   position: absolute;
   max-width: 300px;
   right: 15px;
+}
+
+.cesko-color {
+  background-color: #60C028;
 }
 
     </style>
@@ -189,25 +193,33 @@ function drawContent() {
 }
 
 function composePollInfo() {
-  /*
-  pollInfoCountGe:"კვლევის განმავლობაში სულ მოსაზრება გამოთქვა ",
-    pollInfoCountGe:"During the poll, total number of interviewed citizens, was ",
-    pollInfoTimeGe:"-მა ადამიანმა, გამოკითხვა მიმდინარეობდა",
-    pollInfoTimeEn:". Poll was active on ",
-    pollInfoSourceGe:"<br> ინფორმაციის წყარო",
-    pollInfoSourceEn:"<br> Information source",
-    */
-
   var poll = polls[global.currentSource];
+
   var lang = global.currentLang;
   set('.poll-info .card-title', poll['name' + lang]);
+  var pollInfo = ""
 
-  var pollInfo = global.texts['pollInfoCount' + lang];
-  pollInfo += poll.polled;
-  pollInfo += global.texts['pollInfoTime' + lang];
-  pollInfo += poll['pollDate' + lang];
+  if (global.currentSource == "cesko") {
 
-  pollInfo += "<br> <a target='_blank' href='" + poll.source + "'>" + global.texts['pollInfoSource' + lang] + "</a>";
+    pollInfo += global.texts['ceskoActivity' + lang];
+    pollInfo += poll.activity;
+
+    pollInfo += global.texts['ceskoVoteCount' + lang];
+    pollInfo += poll.polled;
+
+    pollInfo += global.texts['ceskoLastChange' + lang];
+    pollInfo += poll['pollDate' + lang];
+
+  } else {
+    pollInfo += global.texts['pollInfoCount' + lang];
+    pollInfo += poll.polled;
+    pollInfo += global.texts['pollInfoTime' + lang];
+    pollInfo += poll['pollDate' + lang];
+  }
+
+  if (poll.source) {
+    pollInfo += "<br> <a target='_blank' href='" + poll.source + "'>" + global.texts['pollInfoSource' + lang] + "</a>";
+  }
 
   set('.poll-info .poll-info-content', pollInfo);
 
@@ -231,10 +243,18 @@ var global = {
     pollDateEn: "Date of poll",
     pollInfoCountGe: "კვლევის განმავლობაში სულ მოსაზრება გამოთქვა ",
     pollInfoCountEn: "During the poll, total number of interviewed citizens, was ",
-    pollInfoTimeGe: "-მა ადამიანმა, გამოკითხვა მიმდინარეობდა ",
-    pollInfoTimeEn: ". Poll was active on ",
+    pollInfoTimeGe: "-მა ადამიანმა, გამოკითხვის დრო - ",
+    pollInfoTimeEn: ". Poll date - ",
     pollInfoSourceGe: "<br> ინფორმაციის წყარო",
     pollInfoSourceEn: "<br> Information source",
+
+    ceskoActivityGe: " ბოლო მონაცემებით არჩევნების აქტივობა არის  ",
+    ceskoActivityEn: " according to recent data, election activity is  ",
+    ceskoVoteCountGe: ". <br><br> ხმა უკვე მიცემული აქვს ",
+    ceskoVoteCountEn: ".  <br><br><br> Already has voted  ",
+    ceskoLastChangeGe: " მოქალაქეს. <br><br> ბოლო განახლების დრო - ",
+    ceskoLastChangeEn: " citizens. <br><br> Last update time - ",
+
   },
   partiesInfo: {
     '1': {
@@ -495,7 +515,6 @@ function draw(p) {
     tooltipContent = tooltipContent.replace(/#VOTE_COUNT_TEXT/i, global.texts['voteCount' + global.currentLang]);
     tooltipContent = tooltipContent.replace(/#VOTE_COUNT/i, (polls[global.currentSource].polled * d.votePercent / 100).toFixed(0));
 
-
     set('.custom-tooltip', tooltipContent);
     d3.select('.custom-tooltip').transition().style('opacity', 1)
     circleGroup.attr('stroke', '#82b1ff')
@@ -611,6 +630,71 @@ function draw(p) {
 }
 
 var polls = {
+  "cesko": {
+    "nameGe": "ცეესკო შედეგები",
+    "nameEn": "cesko results",
+    "polled": 0,
+    "pollDateGe": '8 სთ.',
+    "pollDateEn": '8 a.m',
+    "activity": "0 % ",
+    "source": "",
+    "data": [{
+      "electNumber": "1",
+      "votePercent": 0
+    }, {
+      "electNumber": "3",
+      "votePercent": 0
+    }, {
+      "electNumber": "4",
+      "votePercent": 0
+    }, {
+      "electNumber": "5",
+      "votePercent": 0
+    }, {
+      "electNumber": "6",
+      "votePercent": 0
+    }, {
+      "electNumber": "7",
+      "votePercent": 0
+    }, {
+      "electNumber": "8",
+      "votePercent": 0
+    }, {
+      "electNumber": "10",
+      "votePercent": 0
+    }, {
+      "electNumber": "14",
+      "votePercent": 0
+    }, {
+      "electNumber": "19",
+      "votePercent": 0
+    }, {
+      "electNumber": "23",
+      "votePercent": 0
+    }, {
+      "electNumber": "25",
+      "votePercent": 0
+    }, {
+      "electNumber": "26",
+      "votePercent": 0
+    }, {
+      "electNumber": "27",
+      "votePercent": 0
+    }, {
+      "electNumber": "41",
+      "votePercent": 0
+    }, {
+      "electNumber": "sxva",
+      "votePercent": 0
+    }, {
+      "electNumber": "aravis",
+      "votePercent": 0
+    }, {
+      "electNumber": "argadamiwyvetia",
+      "votePercent": 0
+    }]
+  },
+
   "average": {
     "nameGe": 'გამოკითხვათა შეჯამება',
     "nameEn": 'Exit polls summary',
@@ -933,7 +1017,7 @@ var polls = {
       "votePercent": 0
     }]
   },
-  "test": {
+  /*"test": {
     "nameGe": "test",
     "nameEn": "test",
     "polled": 0,
@@ -995,7 +1079,7 @@ var polls = {
       "electNumber": "argadamiwyvetia",
       "votePercent": 0
     }]
-  },
+  },  */
 
 }
 
@@ -1043,6 +1127,7 @@ function generateButtons(polls) {
   var buttons = keys.map(function(key) {
     var btnClass = " deep-purple lighten-2 ";
     if (key == "average") btnClass = " teal darken-2 ";
+    if (key == "cesko") btnClass = " cesko-color "
     return "<br><button  class=' waves-effect waves-light btn " + btnClass + key + "' onclick=\"global.transition(" + "'" + key + "'" + ")\">" + polls[key]['name' + global.currentLang] + "</button>";
   }).join('');
 
@@ -1073,4 +1158,3 @@ drawContent();
   </body>
 </html>
  
-a
