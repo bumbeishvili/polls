@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
 
 
-    <title>Elections 2016</title>
+    <title>CodePen - A Pen by  dato</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="shortcut icon" type="image/x-icon" href="https://raw.githubusercontent.com/bumbeishvili/Assets/master/Projects/D3/Polls/pollsPng.png" />
@@ -212,13 +212,13 @@ function drawContent() {
 
   var currentSource = global.currentSource;
   if (!currentSource) {
-    currentSource = 'tns';
+    currentSource = 'cesko';
   }
   addAverage(polls);
 
   draw({
     data: {
-      children: merge(polls[currentSource].data),
+      children: merge(polls[currentSource]),
       votePercent: 1 // without it, circles are overlapping - http://stackoverflow.com/questions/14790340/d3-js-pack-layout-circles-are-overlapping
     }
   })
@@ -291,12 +291,12 @@ var global = {
     pollInfoSourceGe: "<br> ინფორმაციის წყარო",
     pollInfoSourceEn: "<br> Information source",
 
-    ceskoActivityGe: " ბოლო მონაცემებით არჩევნების აქტივობა არის  ",
-    ceskoActivityEn: " according to recent data, election activity is  ",
-    ceskoVoteCountGe: ". <br><br> ხმა უკვე მიცემული აქვს ",
-    ceskoVoteCountEn: ".  <br><br><br> Already has voted  ",
-    ceskoLastChangeGe: " მოქალაქეს. <br><br> ბოლო განახლების დრო - ",
-    ceskoLastChangeEn: " citizens. <br><br> Last update time - ",
+    ceskoActivityGe: " არჩევნების აქტივობა დაფიქსირდა  ",
+    ceskoActivityEn: " election activity was  ",
+    ceskoVoteCountGe: ". <br><br> დათვლილია ",
+    ceskoVoteCountEn: ".  <br><br> It's already counted  ",
+    ceskoLastChangeGe: " მოქალაქის ხმა 1814276-დან <br><br> ბოლო განახლების დრო - ",
+    ceskoLastChangeEn: " vote from 1814276. <br><br> Last update time - ",
 
   },
   partiesInfo: {
@@ -480,7 +480,7 @@ function draw(p) {
 
   //drawing circles
 
-  var circleGroups = svg.selectAll('g')
+  var circleGroups = svg.selectAll('circle-group')
     .data(nodes)
     .enter()
     .append('g')
@@ -496,6 +496,9 @@ function draw(p) {
   circleGroups
     .append('circle')
     .attr('fill', function(d) {
+     if(d.votePercent==0){
+        return 'none';
+      }
       return d.party.color;
     })
     .attr('class', function(d) {
@@ -513,6 +516,7 @@ function draw(p) {
     .attr('class', 'title')
     .style("text-anchor", "middle")
     .attr('fill', function(d) {
+     
       return 'white'
     })
     .text(text)
@@ -678,7 +682,7 @@ function draw(p) {
     composePollInfo();
 
     var newNodes = layouts.bubble.nodes({
-        children: merge(polls[source].data),
+        children: merge(polls[source]),
         votePercent: 1
       })
       .filter(function(d) {
@@ -706,7 +710,19 @@ function draw(p) {
 
     .attr('r', function(d) {
       return d.r
-    })
+    }).delay(1000)
+    
+    
+    newCircleGroup.select('circle')
+      .transition()
+    .duration(1000)
+    .delay(2000)
+    .attr('fill', function(d) {
+      if(d.votePercent==0){
+         return "none";
+      }
+      return d.party.color;
+     })
 
     newCircleGroup.select('.title')
       .attr("dy", ".3em")
@@ -742,56 +758,57 @@ var polls = {
   "cesko": {
     "nameGe": "ცეესკო შედეგები",
     "nameEn": "cesko results",
-    "polled": 1814276,
-    "pollDateGe": '8 ოქტომბერი 20 სთ.',
-    "pollDateEn": '8 october 20 h.',
+    "polled": 1150250,//1814276,
+    "pollDateGe": '9 ოქტომბერი 9 სთ.',
+    "pollDateEn": '9 october 9 h.',
     "activity": "51.63 % ",
-    "source": "http://www.interpressnews.ge/ge/skhva/401272-cesko-1500-saathis-mdgomareobith-amomrcheveltha-aqtivobam-3479-sheadgina.html",
+    "type":"results",
+    "source": "http://results.cec.gov.ge/#",
     "data": [{
       "electNumber": "1",
-      "votePercent": 0
+      "votePercent": 3.6
     }, {
       "electNumber": "3",
-      "votePercent": 0
+      "votePercent": 3.36
     }, {
       "electNumber": "4",
-      "votePercent": 0
+      "votePercent": 0.12
     }, {
       "electNumber": "5",
-      "votePercent": 0
+      "votePercent": 26.7
     }, {
       "electNumber": "6",
-      "votePercent": 0
+      "votePercent": 1.48
     }, {
       "electNumber": "7",
-      "votePercent": 0
+      "votePercent": 0.17
     }, {
       "electNumber": "8",
-      "votePercent": 0
+      "votePercent": 4.87
     }, {
       "electNumber": "10",
-      "votePercent": 0
+      "votePercent": 3.04
     }, {
       "electNumber": "14",
-      "votePercent": 0
+      "votePercent": 0.22
     }, {
       "electNumber": "19",
-      "votePercent": 0
+      "votePercent": 0.84
     }, {
       "electNumber": "23",
-      "votePercent": 0
+      "votePercent": 0.07
     }, {
       "electNumber": "25",
-      "votePercent": 0
+      "votePercent": 0.04
     }, {
       "electNumber": "26",
-      "votePercent": 0
+      "votePercent": 0.66
     }, {
       "electNumber": "27",
-      "votePercent": 0
+      "votePercent": 4.13
     }, {
       "electNumber": "41",
-      "votePercent": 0
+      "votePercent": 49.93
     }, {
       "electNumber": "sxva",
       "votePercent": 0
@@ -1353,11 +1370,21 @@ var polls = {
 */
 }
 
-function merge(data) {
+function merge(poll) {
+  var data = poll.data; 
 
   data.forEach(function(d) {
     d.party = global.partiesInfo[d.electNumber]
   })
+  
+  /*
+  if(poll.type=='exitpoll' || poll.type=='results'){
+    data = data.filter(function(d){
+      return !isNaN(d.electNumber)
+    })
+  }
+  */
+  
   return data;
 }
 
