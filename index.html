@@ -536,6 +536,11 @@ function draw(p) {
       return "";
       
     }
+    
+     if (d.votePercent >= 4) {
+        return d.votePercent.toFixed(2) + ' %';
+      }
+
       if (d.votePercent >= 1.2) {
         return d.votePercent.toFixed(1) + ' %';
       }
@@ -742,6 +747,9 @@ function draw(p) {
       .style("text-anchor", "middle")
       .attr('fill-opacity', 0)
       .text(function(d) {
+       if (d.votePercent >= 4) {
+        return d.votePercent.toFixed(2) + ' %';
+      }
         if (d.votePercent >= 1.2) {
           return d.votePercent.toFixed(1) + ' %';
         }
@@ -758,24 +766,24 @@ var polls = {
   "cesko": {
     "nameGe": "ცეესკო შედეგები",
     "nameEn": "cesko results",
-    "polled": 1497684,//1814276,
-    "pollDateGe": '9 ოქტომბერი 17:44 სთ.',
-    "pollDateEn": '9 october 17:44 h.',
+    "polled": 1803571,//1814276,
+    "pollDateGe": '9 ოქტომბერი 21:00 სთ.',
+    "pollDateEn": '9 october 21:00 h.',
     "activity": "51.63 % ",
     "type":"results",
     "source": "http://results.cec.gov.ge/#",
     "data": [{
       "electNumber": "1",
-      "votePercent": 3.48
+      "votePercent": 3.45
     }, {
       "electNumber": "3",
-      "votePercent": 3.53
+      "votePercent": 3.55
     }, {
       "electNumber": "4",
-      "votePercent": 0.16
+      "votePercent": 0.15
     }, {
       "electNumber": "5",
-      "votePercent": 26.46
+      "votePercent": 27.04
     }, {
       "electNumber": "6",
       "votePercent": 1.55
@@ -784,31 +792,31 @@ var polls = {
       "votePercent": 0.17
     }, {
       "electNumber": "8",
-      "votePercent": 5
+      "votePercent": 4.99
     }, {
       "electNumber": "10",
-      "votePercent": 3.09
-    }, {
-      "electNumber": "14",
       "votePercent": 3.12
     }, {
+      "electNumber": "14",
+      "votePercent": 0.22
+    }, {
       "electNumber": "19",
-      "votePercent": 0.81
+      "votePercent": 0.79
     }, {
       "electNumber": "23",
-      "votePercent": 0.09
+      "votePercent": 0.1
     }, {
       "electNumber": "25",
-      "votePercent": 0.04
+      "votePercent": 0.05
     }, {
       "electNumber": "26",
       "votePercent": 0.72
     }, {
       "electNumber": "27",
-      "votePercent": 4.58
+      "votePercent": 4.59
     }, {
       "electNumber": "41",
-      "votePercent": 49.26
+      "votePercent": 48.61
     }, {
       "electNumber": "sxva",
       "votePercent": 0
