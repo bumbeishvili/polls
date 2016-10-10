@@ -13,12 +13,13 @@
 
 
 
-<meta property="og:title"              content="არჩევნების შედეგების დინამიური ვიზუალიზაცია" />
-<meta property="og:description"        content="შეადარეთ სხვადასხვა ორგანიზაციების მიერ დაკვეთილი ეგზითპოლებისა და ცეესკოს შედეგები ერთმანეთს" />
+<meta property="og:title"              content="მატყუარა ეგზიტპოლები?!" />
+<meta property="og:description"        content="ეგზიტპოლების, წინასაარჩევნო გამოკითხვებისა და რეალური შედეგების შედარება" />
 <meta property="og:image"              content="https://raw.githubusercontent.com/bumbeishvili/Assets/master/Projects/D3/Polls/pollsFinal.png" />
     
     
     <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/css/materialize.min.css'>
+<link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.11/c3.min.css'>
 
         <style>
       h1 {
@@ -63,6 +64,13 @@
   right: 15px;
 }
 
+.dispersion {
+  position: absolute;
+  max-width: 300px;
+  right: 15px;
+  bottom: 30px;
+}
+
 .cesko-color {
   background-color: #60C028;
 }
@@ -76,6 +84,13 @@
     position: relative;
     max-width: 90%;
     left: 5%;
+  }
+
+  .dispersion {
+    position: relative;
+    max-width: 90%;
+    left: 5%;
+    margin-top: 50px;
   }
 
   .buttons {
@@ -154,7 +169,9 @@
     </div>
   </div>
 </div>
-<div class=" poll-info">
+
+
+ <div class=" poll-info">
   <div class="card ">
     <div class="card-content ">
       <span class="card-title"> გამოკითხვათა შეჯამება</span>
@@ -168,42 +185,137 @@
     </div>
 
   </div>
-  <div class="fb-share-button" data-href="http://polls.ge/" data-layout="button_count" data-size="small" data-mobile-iframe="true"><a class="fb-xfbml-parse-ignore" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Fpolls.ge%2F&amp;src=sdkpreparse">Share</a></div>
-
-  <div style="float:right" class="fb-like" data-href="https://www.facebook.com/polls.ge/" data-layout="button_count" data-action="like" data-size="small" data-show-faces="true" data-share="false"></div>
 
 
-</div>
+  <div class="fb-share-button" data-href="http://polls.ge/" data-layout="button_count" data-size="large" data-mobile-iframe="false"><a class="fb-xfbml-parse-ignore" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Fpolls.ge%2F&amp;src=sdkpreparse">Share </a></div>
+
+  <div style="float:right" class="fb-like" data-href="https://www.facebook.com/polls.ge/" data-layout="button_count" data-action="like" data-size="small" data-show-faces="true" data-share="false">
+
+  </div></div>
+
+  <div class=" dispersion">
+    <div class="card ">
+      <div class="card-content ">
+        <span class="card-title"> </span>
+        <br>
+        <div class="dispersion-info-content">
+
+        </div>
+
+      </div>
+
+    </div>
 
 
-<div class="row">
-
-  <div class="buttons"></div>
-
-  <div id='graphContent'></div>
-</div>
-<div class="row">
-
-  <div class="fb-comments " data-href="http://polls.ge/" data-numposts="5"></div>
-</div>
+  </div>
 
 
-<div class="custom-tooltip"></div>
+  <div class="row">
+
+    <div class="buttons"></div>
+
+    <div id='graphContent'></div>
+  </div>
+  <div class="row">
+
+    <div class="fb-comments " data-href="http://polls.ge/" data-numposts="5"></div>
+  </div>
+
+
+  <div class="custom-tooltip"></div>
     
     <script src='https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js'></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js'></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/js/materialize.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.11/c3.min.js'></script>
 
         <script>
       var selector = '#graphContent';
+var gauge;
 
-function isSmallScreen(){
-  return window.innerWidth<1000;
+function extractDispersion() {
+
+  polls.cesko.data.sort(function(x, y) {
+    return d3.ascending(x.electNumber, y.electNumber);
+  })
+
+  console.log("##################");
+  var dispersions = {};
+  var maxDispersion = 0;
+  var keys = Object.keys(polls);
+  keys.forEach(function(key) {
+    dispersions[key] = 0;
+    polls[key].data.sort(function(x, y) {
+      return d3.ascending(x.electNumber, y.electNumber);
+    })
+    polls.cesko.data.forEach(function(v, i) {
+      var ceskoNode = polls['cesko'].data[i];
+      var pollNode = polls[key].data[i];
+      if (!isNaN(ceskoNode.electNumber)) {
+        if (ceskoNode.votePercent > 0 && pollNode.votePercent > 0) {
+          dispersions[key] += Math.pow(ceskoNode.votePercent - pollNode.votePercent, 2);
+        }
+      }
+    })
+    if (dispersions[key] > maxDispersion) {
+      maxDispersion = dispersions[key];
+    }
+  })
+
+  global.dispersions = dispersions;
+  global.maxDispersion = maxDispersion;
+  console.log(global);
 }
+
+function drawGauge() {
+  gauge = c3.generate({
+    bindto: '.dispersion-info-content',
+    data: {
+      columns: [
+        ['განსხვავება', global.dispersions[global.currentSource] / (global.maxDispersion + 0.0001) * 100]
+      ],
+      type: 'gauge',
+    },
+    tooltip: {
+      show: false
+    },
+    gauge: {
+      //        label: {
+      //            format: function(value, ratio) {
+      //                return value;
+      //            },min
+      //            show: false // to turn off the min/max labels.
+      //        },
+      unit: '',
+      width: 39 // for adjusting arc thickness
+    },
+    color: {
+      pattern: ['#60B044', '#F6C600', '#F97600', '#FF0000'], // the three color levels for the percentage values.
+      threshold: {
+        //            unit: 'value', // percentage is default
+        //            max: 200, // 100 is default
+        values: [30, 60, 90, 100]
+      }
+    },
+    size: {
+      height: 240,
+      width: 260
+    }
+  });
+
+  gaugeText();
+
+}
+
+function isSmallScreen() {
+  return window.innerWidth < 1000;
+}
+
 function toggle() {
   set('.toggle-lang', global.currentLang);
   global.currentLang = global.currentLang == "En" ? "Ge" : 'En';
-  drawContent()
+  drawContent();
+  gaugeText();
 }
 
 function drawContent() {
@@ -214,7 +326,8 @@ function drawContent() {
   if (!currentSource) {
     currentSource = 'cesko';
   }
-  addAverage(polls);
+  gaugeText();
+  //addAverage(polls);
 
   draw({
     data: {
@@ -234,6 +347,8 @@ function composePollInfo() {
 
   var lang = global.currentLang;
   set('.poll-info .card-title', poll['name' + lang]);
+  set('.dispersion .card-title', global.texts['dispersionTitle' + lang]);
+
   var pollInfo = ""
 
   if (global.currentSource == "cesko") {
@@ -241,15 +356,11 @@ function composePollInfo() {
     pollInfo += global.texts['ceskoActivity' + lang];
     pollInfo += poll.activity;
 
-    pollInfo += global.texts['ceskoVoteCount' + lang];
-    pollInfo += poll.polled;
+    pollInfo += global.texts['ceskoSummary' + lang];
 
-    pollInfo += global.texts['ceskoLastChange' + lang];
+  } else if (poll.type == "pointOfView" || poll.type == "exitpoll") {
     pollInfo += poll['pollDate' + lang];
-
-  } else if(poll.type=="pointOfView"||poll.type=="exitpoll"){
-    pollInfo += poll['pollDate' + lang];
-  }else {
+  } else {
     pollInfo += global.texts['pollInfoCount' + lang];
     pollInfo += poll.polled;
     pollInfo += global.texts['pollInfoTime' + lang];
@@ -272,10 +383,10 @@ var global = {
   texts: {
     headerEn: "Elections 2016",
     headerGe: "არჩევნები 2016",
-    
-    contactGe:"<!--<a  target='_blank' href='https://www.facebook.com/polls.ge/'>მოგვწერეთ</a>, სხვა გამოკითხვების დასამატებლად-->",
-    contactEn:"<!--<a target='_blank' href='https://www.facebook.com/polls.ge/'>Write us </a>, to add more polls-->",
-    
+
+    contactGe: "<!--<a  target='_blank' href='https://www.facebook.com/polls.ge/'>მოგვწერეთ</a>, სხვა გამოკითხვების დასამატებლად-->",
+    contactEn: "<!--<a target='_blank' href='https://www.facebook.com/polls.ge/'>Write us </a>, to add more polls-->",
+
     votePercentGe: "პროცენტულობა",
     votePercentEn: "Percent",
     voteCountGe: "მიღებული ხმები",
@@ -291,12 +402,21 @@ var global = {
     pollInfoSourceGe: "<br> ინფორმაციის წყარო",
     pollInfoSourceEn: "<br> Information source",
 
-    ceskoActivityGe: " არჩევნების აქტივობა დაფიქსირდა  ",
+    ceskoActivityGe: "   დაფიქსირდა არჩევნების ",
     ceskoActivityEn: " election activity was  ",
     ceskoVoteCountGe: ". <br><br> დათვლილია ",
     ceskoVoteCountEn: ".  <br><br> It's already counted  ",
     ceskoLastChangeGe: " მოქალაქის ხმა 1814276-დან <br><br> ბოლო განახლების დრო - ",
     ceskoLastChangeEn: " vote from 1814276. <br><br> Last update time - ",
+    ceskoSummaryGe: "<br><br> დათვლილია ხმების 100%, სულ 1759937 ხმა",
+
+    gaugeMinGe: 'ძაან მცირე აცდენა',
+    gaugeMinEn: 'Very small difference',
+    gaugeMaxGe: 'ძაან დიდი აცდენა',
+    gaugeMaxEn: 'Very big difference',
+
+    dispersionTitleGe: 'აცდენა ცესკოსგან',
+    dispersionTitleEn: 'Difference from Cesko ',
 
   },
   partiesInfo: {
@@ -425,7 +545,8 @@ var global = {
       shortNameEn: "Don't know",
       nameEn: "I don't know yet ",
       color: '#aab3c1'
-    },'uari': {
+    },
+    'uari': {
       shortNameGe: "უარი",
       nameGe: 'უარი პასუხზე',
       shortNameEn: "No!",
@@ -496,7 +617,7 @@ function draw(p) {
   circleGroups
     .append('circle')
     .attr('fill', function(d) {
-     if(d.votePercent==0){
+      if (d.votePercent == 0) {
         return 'none';
       }
       return d.party.color;
@@ -516,7 +637,7 @@ function draw(p) {
     .attr('class', 'title')
     .style("text-anchor", "middle")
     .attr('fill', function(d) {
-     
+
       return 'white'
     })
     .text(text)
@@ -532,12 +653,12 @@ function draw(p) {
       return 'white'
     })
     .text(function(d) {
-    if(isSmallScreen() && d.votePercent < 3.5){
-      return "";
-      
-    }
-    
-     if (d.votePercent >= 4) {
+      if (isSmallScreen() && d.votePercent < 3.5) {
+        return "";
+
+      }
+
+      if (d.votePercent >= 4) {
         return d.votePercent.toFixed(2) + ' %';
       }
 
@@ -558,9 +679,9 @@ function draw(p) {
   function mouseMove(d) {
     var y = d3.event.pageY - 200;
     var x = d3.event.pageX + 20;
-    
-    if(isSmallScreen()){
-      y-=500;
+
+    if (isSmallScreen()) {
+      y -= 500;
     }
 
     d3.select('.custom-tooltip').style('top', y + 'px').style('left', x + 'px')
@@ -571,9 +692,9 @@ function draw(p) {
 
     var circleGroup = d3.select(this)
       .select('circle');
-    
-    var countTextReplacer="";
-    var countReplacer="";
+
+    var countTextReplacer = "";
+    var countReplacer = "";
 
     var tooltipContent = get('.tooltip-template').innerHTML;
 
@@ -581,14 +702,14 @@ function draw(p) {
     tooltipContent = tooltipContent.replace(/#PARTY_NAME/i, d.party['name' + global.currentLang]);
     tooltipContent = tooltipContent.replace(/#VOTE_PERCENT_TEXT/i, global.texts['votePercent' + global.currentLang]);
     tooltipContent = tooltipContent.replace(/#VOTE_PERCENT/i, d.votePercent.toFixed(2));
-    
-    if(polls[global.currentSource].type != 'exitpoll'){
-          countTextReplacer=global.texts['voteCount' + global.currentLang];
-     countReplacer=(polls[global.currentSource].polled * d.votePercent / 100).toFixed(0);
+
+    if (polls[global.currentSource].type != 'exitpoll') {
+      countTextReplacer = global.texts['voteCount' + global.currentLang];
+      countReplacer = (polls[global.currentSource].polled * d.votePercent / 100).toFixed(0);
     }
 
-     tooltipContent = tooltipContent.replace(/#VOTE_COUNT_TEXT/i,countTextReplacer );
-    tooltipContent = tooltipContent.replace(/#VOTE_COUNT/i,countReplacer) ;
+    tooltipContent = tooltipContent.replace(/#VOTE_COUNT_TEXT/i, countTextReplacer);
+    tooltipContent = tooltipContent.replace(/#VOTE_COUNT/i, countReplacer);
 
     set('.custom-tooltip', tooltipContent);
     d3.select('.custom-tooltip').transition().style('opacity', 1)
@@ -614,64 +735,51 @@ function draw(p) {
 
   function text(d) {
 
-    var smallScreen  = isSmallScreen();
+    var smallScreen = isSmallScreen();
     var n = '';
-     var electNumber = "";
-     if (!isNaN(d.electNumber)) {
+    var electNumber = "";
+    if (!isNaN(d.electNumber)) {
       electNumber = d.electNumber + ". ";
-       n='N ';
+      n = 'N ';
     }
-    
-    
-    
-    
+
     if (d.votePercent > 30) {
-      return n+electNumber + d.party['shortName' + global.currentLang];
-    } 
-    
-     if (d.votePercent >1 && isNaN(d.electNumber) ) {
+      return n + electNumber + d.party['shortName' + global.currentLang];
+    }
+
+    if (d.votePercent > 1 && isNaN(d.electNumber)) {
       return d.party['shortName' + global.currentLang];
     }
-    
-    
-     if (d.votePercent <=1.2  ) {
+
+    if (d.votePercent <= 1.2) {
       return "";
     }
-    
-    if(smallScreen){
-      if (d.votePercent > 5  && !isNaN(d.electNumber)) {
+
+    if (smallScreen) {
+      if (d.votePercent > 5 && !isNaN(d.electNumber)) {
         return 'N ' + d.electNumber;
       }
-      
-       if (d.votePercent <3 ) {
-          return "";
-        }
-    }else{
-      
-      if (d.votePercent > 11 ) {
-          return electNumber + d.party['shortName' + global.currentLang];
+
+      if (d.votePercent < 3) {
+        return "";
       }
-      if(isNaN(d.electNumber)){
+    } else {
+
+      if (d.votePercent > 11) {
+        return electNumber + d.party['shortName' + global.currentLang];
+      }
+      if (isNaN(d.electNumber)) {
         return ""
       }
-      
-       if (d.votePercent > 2  ) {
+
+      if (d.votePercent > 2) {
         return 'N ' + d.electNumber;
       }
-      if (d.votePercent > 0.4 ) {
-      return 'N ' + d.electNumber;
+      if (d.votePercent > 0.4) {
+        return 'N ' + d.electNumber;
 
-       }
+      }
     }
-   
-   
-
-    
-    
-    
-   
-   
-    
 
   }
 
@@ -684,6 +792,14 @@ function draw(p) {
     get('.' + global.currentSource).disabled = false;
     global.currentSource = source;
     get('.' + global.currentSource).disabled = true;
+
+    gauge.load({
+      columns: [
+        [global.difference, global.dispersions[global.currentSource] / (global.maxDispersion + 0.0001) * 100]
+      ]
+    });
+    gaugeText();
+    d3.select('.c3-gauge-value').text('');
     composePollInfo();
 
     var newNodes = layouts.bubble.nodes({
@@ -716,18 +832,16 @@ function draw(p) {
     .attr('r', function(d) {
       return d.r
     }).delay(1000)
-    
-    
+
     newCircleGroup.select('circle')
       .transition()
-    .duration(1000)
-    .delay(2000)
-    .attr('fill', function(d) {
-      if(d.votePercent==0){
-         return "none";
-      }
-      return d.party.color;
-     })
+      .delay(2000)
+      .attr('fill', function(d) {
+        if (d.votePercent == 0) {
+          return "none";
+        }
+        return d.party.color;
+      })
 
     newCircleGroup.select('.title')
       .attr("dy", ".3em")
@@ -747,9 +861,9 @@ function draw(p) {
       .style("text-anchor", "middle")
       .attr('fill-opacity', 0)
       .text(function(d) {
-       if (d.votePercent >= 4) {
-        return d.votePercent.toFixed(2) + ' %';
-      }
+        if (d.votePercent >= 4) {
+          return d.votePercent.toFixed(2) + ' %';
+        }
         if (d.votePercent >= 1.2) {
           return d.votePercent.toFixed(1) + ' %';
         }
@@ -764,26 +878,26 @@ function draw(p) {
 
 var polls = {
   "cesko": {
-    "nameGe": "ცეესკო შედეგები",
+    "nameGe": "ცესკო შედეგები",
     "nameEn": "cesko results",
-    "polled": 1812824,//1814276,
+    "polled": 1759937, //1814276,
     "pollDateGe": '10 ოქტომბერი დილის 1-ლი  სთ.',
     "pollDateEn": '10 october 1 a.m. ',
-    "activity": "51.63 % ",
-    "type":"results",
+    "activity": "51.63% - იანი აქტივობა ",
+    "type": "results",
     "source": "http://results.cec.gov.ge/#",
     "data": [{
       "electNumber": "1",
       "votePercent": 3.45
     }, {
       "electNumber": "3",
-      "votePercent": 3.54
+      "votePercent": 3.53
     }, {
       "electNumber": "4",
       "votePercent": 0.13
     }, {
       "electNumber": "5",
-      "votePercent": 27.14
+      "votePercent": 27.11
     }, {
       "electNumber": "6",
       "votePercent": 1.55
@@ -792,10 +906,10 @@ var polls = {
       "votePercent": 0.16
     }, {
       "electNumber": "8",
-      "votePercent": 5
+      "votePercent": 5.01
     }, {
       "electNumber": "10",
-      "votePercent": 3.13
+      "votePercent": 3.14
     }, {
       "electNumber": "14",
       "votePercent": 0.22
@@ -810,13 +924,13 @@ var polls = {
       "votePercent": 0.04
     }, {
       "electNumber": "26",
-      "votePercent": 0.72
+      "votePercent": 0.73
     }, {
       "electNumber": "27",
-      "votePercent": 4.61
+      "votePercent": 4.62
     }, {
       "electNumber": "41",
-      "votePercent": 48.6
+      "votePercent": 48.67
     }, {
       "electNumber": "sxva",
       "votePercent": 0
@@ -826,19 +940,19 @@ var polls = {
     }, {
       "electNumber": "argadamiwyvetia",
       "votePercent": 0
-    },{
+    }, {
       "electNumber": "uari",
       "votePercent": 0
     }]
   },
-"tns": {
+  "tns": {
     "nameGe": "TNS ეგზიტპოლი (GDS,მაესტრო, იმედი,1tv)",
     "nameEn": "TNS exitpoll (GDS, maestro,imedi,1tv)",
-  "polled":0,
+    "polled": 0,
     "pollDateGe": '8 ოქტომბერი',
     "pollDateEn": '8 october',
     "source": "http://www.interpressnews.ge/ge/skhva/401340-tns-opinion-is-egzitpolis-pirveladi-shedegebis-thanakhmad-amomrcheveltha-538-mkhars-qarthul-ocnebas-utcers-kholo-195-qnacionaluri-modzraobasq.html",
-  "type":"exitpoll",
+    "type": "exitpoll",
     "data": [{
       "electNumber": "1",
       "votePercent": 2.7
@@ -893,17 +1007,18 @@ var polls = {
     }, {
       "electNumber": "argadamiwyvetia",
       "votePercent": 0
-    },{
+    }, {
       "electNumber": "uari",
       "votePercent": 0
     }]
-  },  "gfkexit": {
+  },
+  "gfkexit": {
     "nameGe": "GFK-ს ეგზიტპოლი (რუსთავი2)",
     "nameEn": "GFK Exitpoll (Rustavi2)",
     "polled": 0,
     "pollDateGe": '8 ოქტომბერი',
     "pollDateEn": '8 october',
-    "type":"exitpoll",
+    "type": "exitpoll",
     "source": "http://www.interpressnews.ge/ge/skhva/401339-gfk-is-egzitpolis-pirveladi-shedegebith-qarthul-ocnebas-amomrcheveltha-399-ma-nacionalur-modzraobas-ki-3274-ma-dautcira-mkhari.html",
     "data": [{
       "electNumber": "1",
@@ -959,11 +1074,12 @@ var polls = {
     }, {
       "electNumber": "argadamiwyvetia",
       "votePercent": 0
-    },{
+    }, {
       "electNumber": "uari",
       "votePercent": 0
     }]
-  },  
+  },
+  /*
   "average": {
     "nameGe": 'გამოკითხვათა შეჯამება',
     "nameEn": 'Polls summary',
@@ -971,13 +1087,14 @@ var polls = {
     "pollDateEn": 'From 7 sept. ',
     "polled": 0,
   },
+  */
   "wpa": {
     "nameGe": "სოციოლოგიური კომპანია WPA",
     "nameEn": "Sociological company WPA",
     "polled": 1329,
     "pollDateGe": '7-11 სექტემბერი',
     "pollDateEn": '7-11 September',
-    "type":"poll",
+    "type": "poll",
     "source": "http://www.interpressnews.ge/ge/sazogadoeba/398603-wpa-s-kvlevis-thanakhmad-gamokithkhultha-25-mkhars-utcers-qarthul-ocnebas-kholo-16-patriottha-alianss.html?ar=A",
     "data": [{
       "electNumber": "1",
@@ -1033,7 +1150,7 @@ var polls = {
     }, {
       "electNumber": "argadamiwyvetia",
       "votePercent": 18
-    },{
+    }, {
       "electNumber": "uari",
       "votePercent": 0
     }]
@@ -1044,7 +1161,7 @@ var polls = {
     "polled": 4113,
     "pollDateGe": '8 ივნ - 6 ივლ.',
     "pollDateEn": '8 jun - 6 jul.',
-    "type":"poll",
+    "type": "poll",
     "source": "https://www.ndi.org/files/Public-Attitude-Findings-Georgian.pdf",
     "data": [{
       "electNumber": "1",
@@ -1100,19 +1217,19 @@ var polls = {
     }, {
       "electNumber": "argadamiwyvetia",
       "votePercent": 38
-    },{
+    }, {
       "electNumber": "uari",
       "votePercent": 13
     }]
-  }, 
-  
+  },
+
   "imedi": {
     "nameGe": "TV იმედი - GPM",
     "nameEn": "TV Imedi - GPM",
     "polled": 1199,
     "pollDateGe": '27 სექ. - 3 ოქტ',
     "pollDateEn": '27 sep - 3 oct.',
-    "type":"poll",
+    "type": "poll",
     "source": "http://liberali.ge/news/view/25011/imedis-kvleva-qartuli-otsneba--36-ertiani-natsionaluri-modzraoba-13",
     "data": [{
       "electNumber": "1",
@@ -1168,7 +1285,7 @@ var polls = {
     }, {
       "electNumber": "argadamiwyvetia",
       "votePercent": 36
-    },{
+    }, {
       "electNumber": "uari",
       "votePercent": 0
     }]
@@ -1179,7 +1296,7 @@ var polls = {
     "polled": global.defaultRespondentCountIfNotSpecified,
     "pollDateGe": 'ოქტომბრის განმავლობაში',
     "pollDateEn": 'during october',
-    "type":"poll",
+    "type": "poll",
     "source": "http://factcheck.ge/article/qhvela-gamokithkhva-erthad-partiebis-tsinasaarchevno-reitingebi/",
     "data": [{
       "electNumber": "1",
@@ -1235,19 +1352,19 @@ var polls = {
     }, {
       "electNumber": "argadamiwyvetia",
       "votePercent": 35
-    },{
+    }, {
       "electNumber": "uari",
       "votePercent": 0
     }]
   },
- "experts": {
+  "experts": {
     "nameGe": "ექსპერტთა გამოკითხვა",
     "nameEn": "Expert polls",
     "polled": 0,
     "pollDateGe": '22-29 სექ.',
     "pollDateEn": '22-29 sep',
     "source": "http://netgazeti.ge/news/144856/",
-    "type":"pointOfView",
+    "type": "pointOfView",
     "data": [{
       "electNumber": "1",
       "votePercent": 9
@@ -1302,7 +1419,7 @@ var polls = {
     }, {
       "electNumber": "argadamiwyvetia",
       "votePercent": 0
-    },{
+    }, {
       "electNumber": "uari",
       "votePercent": 0
     }]
@@ -1379,12 +1496,12 @@ var polls = {
 }
 
 function merge(poll) {
-  var data = poll.data; 
+  var data = poll.data;
 
   data.forEach(function(d) {
     d.party = global.partiesInfo[d.electNumber]
   })
-  
+
   /*
   if(poll.type=='exitpoll' || poll.type=='results'){
     data = data.filter(function(d){
@@ -1392,16 +1509,16 @@ function merge(poll) {
     })
   }
   */
-  
+
   return data;
 }
-
+/*
 function addAverage(polls) {
   var keys = Object.keys(polls);
   var partiesInfoKeys = Object.keys(global.partiesInfo);
   var total = 0
   keys.forEach(function(k) {
-     if( polls[k].type=="poll")  total += polls[k].polled;
+    if (polls[k].type == "poll") total += polls[k].polled;
   });
   polls.average.polled = total;
   polls.average.data = partiesInfoKeys.map(function(pk, i) {
@@ -1413,8 +1530,7 @@ function addAverage(polls) {
     var voted = 0;
 
     keys.forEach(function(k) {
-      console.log(k)
-      if (polls[k].type=="poll" ) {
+      if (polls[k].type == "poll") {
         voted += polls[k].data[i].votePercent * polls[k].polled;
         console.log(polls[k].data[i].electNumber == pk); // all output must be true 
       }
@@ -1426,21 +1542,21 @@ function addAverage(polls) {
   })
 
 }
-
+*/
 function generateButtons(polls) {
-  var contact =  ' <div class="contact"> </div>';
-   
+  var contact = ' <div class="contact"> </div>';
 
   var keys = Object.keys(polls);
   var buttons = keys.map(function(key) {
     var btnClass = " deep-purple lighten-2 ";
     if (key == "average") btnClass = " teal darken-2 ";
     if (key == "cesko") btnClass = " cesko-color "
+    if(polls[key].type=="exitpoll") btnClass='  blue lighten-1 ';
     return "<br><button  class=' waves-effect waves-light btn " + btnClass + key + "' onclick=\"global.transition(" + "'" + key + "'" + ")\">" + polls[key]['name' + global.currentLang] + "</button>";
   }).join('');
 
-  set('.buttons', contact+buttons);
-   set('.contact',global.texts['contact'+global.currentLang]);
+  set('.buttons', contact + buttons);
+  set('.contact', global.texts['contact' + global.currentLang]);
 }
 
 function set(selector, content) {
@@ -1454,11 +1570,17 @@ function get(selector) {
 function clear() {
   set('#graphContent', '');
   set('.buttons', '');
-  polls.average.polled = 0;
-  polls.average.data = null;
+
+}
+
+function gaugeText() {
+  d3.select('.c3-chart-arcs-gauge-min').text(global.texts['gaugeMin' + global.currentLang]).attr('transform', 'translate(25,0)');
+  d3.select('.c3-chart-arcs-gauge-max').text(global.texts['gaugeMax' + global.currentLang]).attr('transform', 'translate(-25,0)');
 }
 
 drawContent();
+extractDispersion()
+drawGauge();
       //# sourceURL=pen.js
     </script>
 
