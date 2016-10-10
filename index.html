@@ -233,6 +233,13 @@
       var selector = '#graphContent';
 var gauge;
 
+(function setLanguage(){
+  if(!localStorage.getItem('lang')){
+    localStorage.setItem('lang','Ge');
+  }
+  
+})()
+
 function extractDispersion() {
 
   polls.cesko.data.sort(function(x, y) {
@@ -314,6 +321,7 @@ function isSmallScreen() {
 function toggle() {
   set('.toggle-lang', global.currentLang);
   global.currentLang = global.currentLang == "En" ? "Ge" : 'En';
+  localStorage.setItem('lang', global.currentLang);
   drawContent();
   gaugeText();
 }
@@ -354,7 +362,7 @@ function composePollInfo() {
   if (global.currentSource == "cesko") {
 
     pollInfo += global.texts['ceskoActivity' + lang];
-    pollInfo += poll.activity;
+    pollInfo += poll['activity' + lang];
 
     pollInfo += global.texts['ceskoSummary' + lang];
 
@@ -378,7 +386,7 @@ function composePollInfo() {
 var global = {
   transition: null,
   currentSource: null,
-  currentLang: "Ge",
+  currentLang: localStorage.getItem('lang'),
   defaultRespondentCountIfNotSpecified: 1200, // this is standart number  of sociological polls, according to tornike bakakuri
   texts: {
     headerEn: "Elections 2016",
@@ -409,6 +417,7 @@ var global = {
     ceskoLastChangeGe: " მოქალაქის ხმა 1814276-დან <br><br> ბოლო განახლების დრო - ",
     ceskoLastChangeEn: " vote from 1814276. <br><br> Last update time - ",
     ceskoSummaryGe: "<br><br> დათვლილია ხმების 100%, სულ 1759937 ხმა",
+ceskoSummaryEn: "<br><br>100 % finished counting votes , counted  1759937 ",
 
     gaugeMinGe: 'ძაან მცირე აცდენა',
     gaugeMinEn: 'Very small difference',
@@ -883,7 +892,8 @@ var polls = {
     "polled": 1759937, //1814276,
     "pollDateGe": '10 ოქტომბერი დილის 1-ლი  სთ.',
     "pollDateEn": '10 october 1 a.m. ',
-    "activity": "51.63% - იანი აქტივობა ",
+    "activityEn": "51.63% ",
+    "activityGe": "51.63% - იანი აქტივობა ",
     "type": "results",
     "source": "http://results.cec.gov.ge/#",
     "data": [{
