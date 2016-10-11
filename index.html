@@ -264,6 +264,7 @@ function extractDispersion() {
         }
       }
     })
+    dispersions[key] = Math.sqrt(dispersions[key]);
     if (dispersions[key] > maxDispersion) {
       maxDispersion = dispersions[key];
     }
