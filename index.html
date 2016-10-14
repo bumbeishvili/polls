@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
 
 
-    <title>Election 2016</title>
+    <title>Elections 2016</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="shortcut icon" type="image/x-icon" href="https://raw.githubusercontent.com/bumbeishvili/Assets/master/Projects/D3/Polls/pollsPng.png" />
@@ -197,11 +197,11 @@
     <div class="card ">
       <div class="card-content ">
         <span class="card-title"> </span>
-        <br>
         <div class="dispersion-info-content">
+      
 
         </div>
-
+   
       </div>
 
     </div>
@@ -235,9 +235,14 @@ var gauge;
 
 (function setLanguage(){
   if(!localStorage.getItem('lang')){
-    localStorage.setItem('lang','Ge');
+    localStorage.setItem('lang','En');
   }
-  
+  var lang = localStorage.getItem('lang');
+  if(lang=='Ge'){
+    set('.toggle-lang','En')
+  }else{
+     set('.toggle-lang','Ge')
+  }
 })()
 
 function extractDispersion() {
